@@ -1,0 +1,115 @@
+System Design & Architecture Specification: tpt-algorithms
+1. Executive Summary
+tpt-algorithms is a high-performance, permissively licensed Rust monorepo containing clean-room implementations of critical scientific, financial, and systems algorithms. The project aims to replace proprietary, paywalled, or GPL-locked industry standards with MIT-licensed alternatives. All published crates will use the tpt-algo- prefix, and the project enforces a strict dependency policy that bans any dependency that is exclusively licensed under Apache-2.0.
+2. Core Design Principles
+Strictly Permissive & MIT-Preferred Licensing: All code and all transitive dependencies must be MIT, BSD, ISC, or Zlib. Zero tolerance for Apache-2.0-only dependencies, and zero tolerance for copyleft (GPL/AGPL/LGPL).
+Solo-Maintainer Optimized: Heavy reliance on automated CI/CD, strict API boundaries, and minimal external dependencies to reduce maintenance burden.
+Performance & Determinism: Zero-cost abstractions, avoidance of garbage collection pauses, and deterministic execution paths.
+Validation-First: No algorithm is merged without a reproducible validation path against public, unencumbered datasets or synthetic benchmarks.
+3. Repository & Workspace Architecture
+The project utilizes a Cargo Workspace to manage multiple crates within a single Git repository.
+3.1 Directory Structure
+
+tpt-algorithms/
+├── Cargo.toml                 # Workspace root
+├── deny.toml                  # cargo-deny configuration (License enforcement)
+├── release-plz.toml           # Automated release configuration
+├── .github/workflows/         # CI/CD pipelines
+│
+├── crates/                    # Public, publishable algorithm crates
+│   ├── tpt-algo-routing/      # VRP & Last-Mile Optimization
+│   ├── tpt-algo-fraud/        # Anomaly Scoring & Isolation Forests
+│   ├── tpt-algo-orderbook/    # Limit Order Book Simulation
+│   ├── tpt-algo-swarm/        # Velocity Obstacle & Path Planning
+│   ├── tpt-algo-soc/          # Battery State-of-Charge (Kalman Filters)
+│   ├── tpt-algo-consensus/    # BFT Consensus Variants (HotStuff, etc.)
+│   └── ...                    # Remaining domain crates
+│
+├── internal/                  # Private, unpublished workspace crates
+│   ├── tpt-algo-math-core/    # Shared linear algebra, matrix ops, stats
+│   ├── tpt-algo-geometry/     # Shared spatial, kinematic, and 3D math
+│   └── tpt-algo-synth-data/   # Deterministic synthetic data generators
+│
+└── benches/                   # Cross-crate Criterion benchmark suites
+
+3.2 Crate Naming & Versioning
+All public and internal crates must use the tpt-algo- prefix.
+The root repository is named tpt-algorithms, but the individual crates published to crates.io are tpt-algo-*.
+4. Technical Implementation Guidelines
+4.1 no_std and Feature Flags
+Many target domains (swarm robotics, edge AI, embedded crypto) run in constrained environments.
+Default to no_std: Core algorithmic logic should be #![no_std] compatible.
+Feature Flags:
+std: Enables standard library features.
+serde: Enables serialization/deserialization.
+alloc: Enables heap allocation for environments without a full OS.
+4.2 Error Handling
+Use thiserror for defining library-specific error types.
+No unwrap() or expect() in core logic. All potential panics must be handled via Result or safe fallback logic.
+4.3 Numerical Stability & Math
+Avoid writing custom floating-point math where established, permissively licensed crates exist.
+Allowed Math Dependencies: nalgebra, ndarray, libm (provided they satisfy the MIT or dual-license rule in Section 5).
+For deterministic floating-point operations, use ordered-float or fixed-point arithmetic where strict determinism is required (e.g., BFT consensus).
+5. Dependency & License Governance (Strict Enforcement)
+To protect the permissive nature of the project and adhere to the "no Apache-only" rule, license enforcement is automated via cargo-deny.
+5.1 The "No Apache-Only" Rule
+We do not accept dependencies that are strictly and exclusively licensed under Apache-2.0.
+Allowed: MIT, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, Unicode-DFS-2016.
+Allowed (Dual-License): Crates licensed as MIT OR Apache-2.0 are allowed, because Cargo allows us to elect the MIT license for the dependency tree.
+Banned: Any crate where the license expression is only Apache-2.0.
+Banned: GPL, AGPL, LGPL, SSPL, EUPL, CC-BY-NC.
+5.2 cargo-deny Configuration (deny.toml)
+To enforce this, we do not put Apache-2.0 in the allowed list. We only put MIT and other permissive licenses. cargo-deny will automatically accept MIT OR Apache-2.0 crates (because they satisfy the MIT requirement) but will reject Apache-2.0-only crates.
+
+[licenses]
+unlicensed = "deny"
+allow = [
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-DFS-2016",
+    "Unicode-3.0",
+]
+# Explicitly deny Apache-2.0 if it appears as the sole license
+# (Dual MIT/Apache crates will pass because they satisfy the "MIT" allow rule)
+deny = [
+    "Apache-2.0", 
+    "GPL-1.0", "GPL-2.0", "GPL-3.0",
+    "AGPL-1.0", "AGPL-3.0",
+    "LGPL-2.0", "LGPL-2.1", "LGPL-3.0",
+    "SSPL-1.0", "EUPL-1.1", "EUPL-1.2"
+]
+
+5.3 Dependency Minimization
+Prefer the Rust standard library over external crates.
+Before adding a dependency, verify its license tree. If a required crate is Apache-2.0-only, you must either find an MIT alternative or implement the logic internally in tpt-algo-math-core.
+6. Validation & Testing Strategy
+Since we are recreating scientific references, proving accuracy is paramount.
+6.1 Testing Tiers
+Unit Tests: In-crate tests for individual functions and edge cases.
+Property-Based Tests: Use proptest to verify mathematical invariants.
+Integration/Benchmark Tests: Located in the benches/ directory.
+6.2 Validation Against Public Data
+Each crate must include a validation module or test suite that ingests public datasets:
+Example (tpt-algo-orderbook): Ingests LOBSTER data, replays events, and asserts that the calculated VWAP and spread match the historical ground truth within a 0.01% tolerance.
+Example (tpt-algo-soc): Ingests NASA Battery Dataset, runs the Extended Kalman Filter, and asserts the RMSE of the State-of-Charge estimation is within the paper's claimed bounds.
+7. Formal Verification & Correctness
+Safety-critical domains (Aviation, Consensus, Crypto) benefit from mathematical guarantees.
+Type-State Pattern: Use Rust's type system to make invalid states unrepresentable.
+Contract Verification: For critical invariants, utilize requires and ensures style checks (via tools like prusti or custom assertions in debug builds) to verify QF_LRA constraints, ensuring variables never violate physical or logical limits.
+8. CI/CD & Maintenance Automation
+8.1 Continuous Integration (GitHub Actions)
+Every Pull Request must pass:
+cargo fmt --check
+cargo clippy -- -D warnings
+cargo test --workspace
+cargo deny check (Crucial for catching accidental Apache-only or GPL dependencies)
+cargo audit
+8.2 Automated Releases (release-plz)
+Use release-plz to automate the release lifecycle:
+Detects which tpt-algo-* crates have changed.
+Bumps versions and generates changelogs.
+Opens a single PR for the release. Once merged, it publishes the updated crates to crates.io.
+
