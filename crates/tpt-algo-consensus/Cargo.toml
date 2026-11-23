@@ -16,7 +16,6 @@ alloc = []
 serde = ["dep:serde"]
 
 [dependencies]
-libm.workspace = true
 serde = { workspace = true, optional = true }
 thiserror.workspace = true
 
