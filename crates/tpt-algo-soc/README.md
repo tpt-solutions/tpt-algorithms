@@ -1,21 +1,45 @@
 # tpt-algo-soc
 
-Battery state-of-charge (SoC) estimation with an Extended Kalman Filter over a
-first-order RC (Thevenin) equivalent-circuit model. Pure Rust, `no_std`, no
-allocator required, no `unsafe`.
+Battery state-of-charge (SoC) estimation with an Extended Kalman Filter (EKF).
+The cell is modelled as a first-order Thevenin equivalent circuit: an
+open-circuit voltage source, a series resistance `R0`, and one RC pair. The
+filter state is `[SoC, V1]`, where `V1` is the RC-pair voltage.
+
+The crate is pure Rust and `no_std`. It needs no allocator and contains no
+`unsafe` code. The open-circuit-voltage table is a const-generic array.
+
+Use it in a battery management system, a simulator, or a teaching example. It
+estimates SoC from current and voltage measurements. It does not measure SoC
+directly, and it needs a cell model that matches the cell.
 
 ## Status
 
-Pre-release (0.0.0). Core model and filter are implemented and unit/property
-tested. Dataset validation is not yet performed.
+Pre-release (`0.0.0`). The model and filter are implemented and unit and property
+tested. Validation against a real discharge dataset has not been run. The crate
+is not yet published to crates.io; depend on it by path or git until the first
+release. See the [changelog](CHANGELOG.md).
 
-## Feature flags
+## Features
 
-- `std` (default): implies `alloc`; uses the standard library.
-- `alloc`: reserved; the crate does not currently allocate.
-- `serde`: `Serialize`/`Deserialize` for `CellParams`, `NoiseConfig`, `Estimate`.
+| Feature | Default | Enables |
+|---------|---------|---------|
+| `std`   | yes     | Implies `alloc`. Uses the standard library. |
+| `alloc` | via `std` | Reserved. The crate does not currently allocate. |
+| `serde` | no      | `Serialize` / `Deserialize` for `CellParams`, `NoiseConfig` and `Estimate`. |
 
-## Usage
+The crate is `no_std` without `std`.
+
+## Installation
+
+```toml
+[dependencies]
+tpt-algo-soc = { path = "../tpt-algo-soc" }
+# tpt-algo-soc = { path = "...", default-features = false }   # no_std
+```
+
+The minimum supported Rust version is `1.98`, matching the workspace.
+
+## Quick start
 
 ```rust
 use tpt_algo_soc::{CellParams, Filter, Model, NoiseConfig, OcvCurve, SocError};
@@ -32,15 +56,68 @@ fn run() -> Result<(), SocError> {
 }
 ```
 
-See `examples/discharge.rs`.
+Sign convention: current is positive on discharge (amps), terminal voltage is in
+volts, time is in seconds, and capacity is in ampere-hours.
+
+## Lifecycle
+
+The filter's lifecycle is encoded in the type system:
+
+1. `Filter::new(model, noise)` returns a `Filter<Uninitialized, N>`.
+2. `initialize(soc, soc_variance, v1_variance)` validates the initial state and
+   variances, and returns a `Filter<Initialized, N>`.
+3. Only an initialized filter has `predict` and `update`, so an uninitialized
+   estimate cannot be used by mistake.
+
+## API overview
+
+| Item | Purpose |
+|------|---------|
+| `OcvCurve::new` | Open-circuit voltage against SoC table, validated on construction. |
+| `CellParams` | Capacity, `R0`, `R1` and `C1`. |
+| `Model::new` | Combines cell parameters and an OCV curve. |
+| `NoiseConfig` | Process and measurement noise. |
+| `Filter<Uninitialized, N>`, `Filter<Initialized, N>` | Type-state EKF. |
+| `Filter::initialize`, `predict`, `update`, `estimate` | The EKF steps. |
+| `Estimate` | The current SoC and related state. |
+| `SocError` | Returned for invalid parameters, tables and filter inputs. |
+
+## Examples
+
+```sh
+cargo run -p tpt-algo-soc --example discharge
+```
 
 ## Validation status
 
-Known-answer tests, proptest invariants (SoC in [0,1], covariance symmetric
-PSD) and a seeded synthetic discharge test run under `cargo test`. The NASA
-Battery Dataset test in `tests/validation.rs` is a skeleton marked `#[ignore]`
-(set `TPT_DATASET_DIR`); no real-data results exist yet.
+- Known-answer tests, proptest invariants (SoC stays in `[0, 1]`, and the
+  covariance stays symmetric positive semi-definite), and a seeded synthetic
+  discharge test all run under `cargo test`.
+- The NASA Battery Dataset test in `tests/validation.rs` is a skeleton marked
+  `#[ignore]`. Set `TPT_DATASET_DIR` to run it. No real-data results exist yet.
+
+## Limitations
+
+- One RC pair only. Cells that need a second-order model will show larger errors.
+- Noise and initial covariance values are caller-supplied and not tuned. Poor
+  values give poor estimates.
+- The OCV curve must match the cell chemistry and temperature. Hysteresis is not
+  modelled.
+- Capacity is treated as constant. Ageing and temperature effects are not modelled.
+
+## References
+
+- The Thevenin (RC equivalent-circuit) cell model and the EKF formulation follow
+  standard battery-management literature. A model-based reference is G. L. Plett,
+  *Battery Management Systems, Volume II: Equivalent-Circuit Methods*, Artech
+  House, 2015.
+- Dataset: NASA Prognostics Center of Excellence, Battery Data Set. Check the
+  source page's terms before publishing a workflow that uses it.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Licence
 
-MIT OR Apache-2.0.
+Licensed under either of MIT or Apache-2.0, at your option.

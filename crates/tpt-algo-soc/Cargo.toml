@@ -6,8 +6,8 @@ rust-version.workspace = true
 license.workspace = true
 description = "Battery state-of-charge estimation via Extended Kalman Filter (RC equivalent circuit)"
 readme = "README.md"
-keywords = ["algorithms", "no-std", "soc"]
-categories = ["algorithms", "science", "no-std"]
+keywords = ["battery", "state-of-charge", "kalman-filter", "ekf", "no-std"]
+categories = ["algorithms", "science", "embedded", "no-std"]
 
 [features]
 default = ["std"]
