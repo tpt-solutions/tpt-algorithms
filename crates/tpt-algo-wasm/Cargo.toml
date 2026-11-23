@@ -1,6 +1,9 @@
 [package]
 name = "tpt-algo-wasm"
 description = "WebAssembly bindings (wasm-bindgen) for tpt-algo-fraud and tpt-algo-soc. Built with wasm-pack; not published to crates.io."
+readme = "README.md"
+keywords = ["wasm", "webassembly", "wasm-bindgen", "bindings"]
+categories = ["wasm", "api-bindings"]
 version = "0.0.0"
 edition = "2021"
 rust-version = "1.98"
