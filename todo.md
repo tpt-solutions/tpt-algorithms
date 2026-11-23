@@ -1,6 +1,6 @@
 # tpt-algorithms — Project TODO
 
-Status legend: `[x]` done · `[~]` partial (see note) · `[ ]` not done (blocked, external, or deliberately skipped; see note). Last updated 2026-11-23.
+Status legend: `[x]` done · `[~]` partial (see note) · `[ ]` not done (blocked, external, or deliberately skipped; see note). Last updated 2026-11-23 (commit after 40f5831).
 
 Owner: TPT Solutions · License: MIT OR Apache-2.0 (own code) · Dependencies: no Apache-2.0-only, no copyleft
 
@@ -65,7 +65,7 @@ Owner: TPT Solutions · License: MIT OR Apache-2.0 (own code) · Dependencies: n
 ## Phase 3 — Dependency governance
 - [x] `deny.toml` using current cargo-deny schema (allow: MIT, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, Unicode-DFS-2016, Unicode-3.0) — _cargo-deny 0.20 schema v2_
 - [x] Handle own workspace crates in cargo-deny (they are MIT OR Apache-2.0; use `private`/`exceptions`/clarify as needed)
-- [~] Verify Apache-only crates are rejected and `MIT OR Apache-2.0` crates pass (test with a throwaway dependency) — _partial: not tested with a throwaway Apache-only dependency_
+- [x] Verify Apache-only crates are rejected and `MIT OR Apache-2.0` crates pass (test with a throwaway dependency) — _probed in a throwaway workspace: Apache-only rejected, MIT OR Apache-2.0 accepted_
 - [x] Ban GPL/AGPL/LGPL/SSPL/EUPL/CC-BY-NC — _by allow-list; deny passes_
 - [x] Advisory and duplicate-version (bans) sections configured
 - [x] Audit license trees: nalgebra, ndarray, libm, ordered-float, thiserror, proptest, criterion, serde — _nalgebra/ndarray not used; all current deps pass deny_
@@ -204,17 +204,17 @@ Owner: TPT Solutions · License: MIT OR Apache-2.0 (own code) · Dependencies: n
 
 ## Phase 14 — Formal verification & contracts
 - [~] Review all crates for type-state opportunities (invalid states unrepresentable) — _partial: done for soc and consensus; not reviewed for others_
-- [ ] Contract macro/helpers: `requires`/`ensures` as `debug_assert` checks — _todo: not implemented; plan in docs/formal-verification.md_
+- [x] Contract macro/helpers: `requires`/`ensures` as `debug_assert` checks — _requires!/ensures! in tpt-algo-math-core; public crates not yet using them_
 - [ ] Apply contracts to physical/logical limits (SoC range, quantities, capacities) — _todo_
-- [ ] Spike an optional verifier (kani or creusot) on one critical function; record result — _todo: kani not installed; not run_
+- [ ] Spike an optional verifier (kani or creusot) on one critical function; record result — _blocked: Kani supports Linux/macOS only; run on Linux or WSL_
 - [x] Document the verification approach (prusti not adopted: unmaintained) — _docs/formal-verification.md_
 
 ## Phase 15 — Documentation
 - [x] Root README (purpose, crate list, licensing, status)
 - [~] Per-crate README audit (consistent structure, examples compile) — _partial: written per crate, not audited for consistency_
-- [ ] docs.rs metadata (features, `docsrs` cfg) — _todo: before first publish_
+- [x] docs.rs metadata (features, `docsrs` cfg) — _all-features and docsrs cfg set for each public crate_
 - [~] Doc tests for every public API — _partial: some crates only_
-- [ ] mdBook or docs site: overview, design principles, validation methodology — _todo_
+- [x] mdBook or docs site: overview, design principles, validation methodology — _book.toml + docs/SUMMARY.md; `mdbook build` clean_
 - [x] Contributing guide for dependencies and clean-room rules (brief) — _CONTRIBUTING.md_
 
 ## Phase 16 — Python / WASM bindings (optional)
@@ -226,7 +226,7 @@ Owner: TPT Solutions · License: MIT OR Apache-2.0 (own code) · Dependencies: n
 
 ## Phase 17 — v0.1 launch
 - [~] Final `cargo deny`, `cargo audit`, full CI green on all crates — _partial: local deny and audit pass; CI not run on GitHub_
-- [~] Verify package contents (`cargo package --list`) for each public crate — _partial: checked soc and routing only_
+- [x] Verify package contents (`cargo package --list`) for each public crate — _cargo package --list checked for all six public crates; no datasets included_
 - [ ] Publish order: dependencies first, then algorithm crates — _todo_
 - [ ] Tag releases, check docs.rs builds — _todo_
 - [ ] Announcement (README badges, post) — _todo_

@@ -13,6 +13,7 @@ Written for: maintainers. Records each decision so it can be revisited with the 
 | D7 | Python / WASM bindings (Phase 16) | **No-go for v0.1.** Deferred to a post-v0.1 milestone. | Keeps v0.1 scope to Rust crates. Revisit once the core crates pass their validation. |
 | D8 | Dependency update bot | Dependabot (`.github/dependabot.yml`) | Native to GitHub; no extra app. |
 | D9 | Versioning | 0.x until validated; semver afterwards | Spec §8.2 / todo Phase 5. |
+| D11 | Kani spike host | Run on Linux or WSL | Kani supports Linux and macOS only, so it cannot run on this Windows machine. |
 | D10 | Formal verification | Contract helpers (debug assertions) for all crates; kani spike on one function (see [formal-verification.md](formal-verification.md)); prusti not adopted | prusti is unmaintained. |
 
 ## Items that need external action (not done in this repository)
