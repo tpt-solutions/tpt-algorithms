@@ -1,0 +1,28 @@
+[package]
+name = "tpt-algo-consensus"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Deterministic BFT consensus state machine (HotStuff-family), fixed-point only"
+readme = "README.md"
+keywords = ["algorithms", "no-std", "consensus"]
+categories = ["algorithms", "science", "no-std"]
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+serde = ["dep:serde"]
+
+[dependencies]
+libm.workspace = true
+serde = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tpt-algo-synth-data.workspace = true
+
+[lints]
+workspace = true
