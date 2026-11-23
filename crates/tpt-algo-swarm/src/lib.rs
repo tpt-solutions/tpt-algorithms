@@ -13,6 +13,23 @@
 //! Fiorini & Shiller (IJRR 1998); van den Berg, Lin & Manocha (ICRA 2008);
 //! van den Berg, Guy, Lin & Manocha (ISRR 2011); Hart, Nilsson & Raphael
 //! (IEEE TSSC 1968).
+//! # Example
+//!
+//! ```
+//! use tpt_algo_swarm::{avoid, Agent, AvoidanceConfig, Vec2};
+//!
+//! let a = Agent {
+//!     position: Vec2::new(0.0, 0.0),
+//!     velocity: Vec2::new(1.0, 0.0),
+//!     radius: 0.5,
+//!     preferred_velocity: Vec2::new(1.0, 0.0),
+//!     max_speed: 1.0,
+//! };
+//! let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(-1.0, 0.0), ..a };
+//! let v = avoid(&a, &[b], &AvoidanceConfig::default()).unwrap();
+//! assert!(v.norm() <= 1.0 + 1e-12);
+//! ```
+//!
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]

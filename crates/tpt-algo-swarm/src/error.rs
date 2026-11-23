@@ -2,6 +2,17 @@
 //! Error type.
 
 /// Errors returned by this crate.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(feature = "alloc")] {
+/// use tpt_algo_swarm::{Grid, SwarmError};
+///
+/// // A grid needs at least one cell in each direction.
+/// assert!(matches!(Grid::new(0, 3), Err(SwarmError::InvalidGrid(_))));
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum SwarmError {
     /// A configuration parameter is out of range.

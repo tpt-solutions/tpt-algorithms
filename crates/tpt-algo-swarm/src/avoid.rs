@@ -4,6 +4,18 @@
 use crate::{SwarmError, Vec2};
 
 /// A disc-shaped agent.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{Agent, Vec2};
+///
+/// // Two agents heading straight at each other.
+/// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+/// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(-1.0, 0.0), ..a };
+/// assert!(a.validate().is_ok() && b.validate().is_ok());
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Agent {
@@ -24,6 +36,16 @@ impl Agent {
     ///
     /// # Errors
     /// [`SwarmError::InvalidAgent`] on violation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::{Agent, SwarmError, Vec2};
+    ///
+    /// let bad = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(0.0, 0.0),
+    ///     radius: 0.0, preferred_velocity: Vec2::new(0.0, 0.0), max_speed: 1.0 };
+    /// assert!(matches!(bad.validate(), Err(SwarmError::InvalidAgent(_))));
+    /// ```
     pub fn validate(&self) -> Result<(), SwarmError> {
         if !(self.position.is_finite()
             && self.velocity.is_finite()
@@ -44,6 +66,16 @@ impl Agent {
 }
 
 /// Which agent takes responsibility for avoiding a collision.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{AvoidanceConfig, Responsibility};
+///
+/// // Full: the neighbour is assumed to keep its velocity. Reciprocal: both agents share the work.
+/// let cfg = AvoidanceConfig { responsibility: Responsibility::Full, ..Default::default() };
+/// assert_eq!(cfg.responsibility, Responsibility::Full);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Responsibility {
@@ -57,6 +89,16 @@ pub enum Responsibility {
 }
 
 /// Parameters of the avoidance step.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::AvoidanceConfig;
+///
+/// let cfg = AvoidanceConfig::default();
+/// assert!(cfg.horizon > 0.0);
+/// assert!(cfg.rings >= 1 && cfg.angles >= 1);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AvoidanceConfig {
@@ -106,6 +148,21 @@ impl AvoidanceConfig {
 /// within `[0, tau]` when A moves with `v`, i.e. iff
 /// `min_{t in [0,tau]} |p - v t| < R`. The test is exact (not sampled): it
 /// solves the quadratic `|p - v t|^2 = R^2` for the first contact time.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{Agent, Vec2};
+/// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+/// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(0.0, 0.0), ..a };
+/// use tpt_algo_swarm::VelocityObstacle;
+///
+/// // B is 4 units ahead and A closes in at speed 1 relative to B.
+/// let vo = VelocityObstacle::new(&a, &b, 10.0, 0.0);
+/// assert!(vo.contains(Vec2::new(1.0, 0.0)));
+/// assert!(!vo.contains(Vec2::new(0.0, 1.0)));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct VelocityObstacle {
     /// Relative position `pB - pA`.
@@ -120,6 +177,20 @@ pub struct VelocityObstacle {
 
 impl VelocityObstacle {
     /// Builds VO(A|B) with a time horizon and extra margin added to the radii.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::{Agent, Vec2};
+    /// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+    ///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+    /// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(0.0, 0.0), ..a };
+    /// use tpt_algo_swarm::VelocityObstacle;
+    ///
+    /// // Radii add up to 1.0, so the obstacle is a disc of radius 1 around B.
+    /// let vo = VelocityObstacle::new(&a, &b, 10.0, 0.0);
+    /// assert_eq!(vo.radius, 1.0);
+    /// ```
     #[must_use]
     pub fn new(a: &Agent, b: &Agent, horizon: f64, margin: f64) -> Self {
         Self {
@@ -133,6 +204,21 @@ impl VelocityObstacle {
     /// Time of first contact for relative velocity `v`, if within the horizon.
     /// If the discs already overlap, returns `Some(0.0)` for
     /// velocities that move them closer and `None` for separating ones.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::{Agent, Vec2};
+    /// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+    ///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+    /// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(0.0, 0.0), ..a };
+    /// use tpt_algo_swarm::VelocityObstacle;
+    ///
+    /// let vo = VelocityObstacle::new(&a, &b, 10.0, 0.0);
+    /// // Closing at speed 1 over distance 4 with contact radius 1: contact at t = 3.
+    /// assert!((vo.time_to_collision(Vec2::new(1.0, 0.0)).unwrap() - 3.0).abs() < 1e-9);
+    /// assert!(vo.time_to_collision(Vec2::new(0.0, 1.0)).is_none()); // moving sideways
+    /// ```
     #[must_use]
     pub fn time_to_collision(&self, v: Vec2) -> Option<f64> {
         let p = self.rel_position;
@@ -166,6 +252,20 @@ impl VelocityObstacle {
     }
 
     /// Whether relative velocity `v` lies inside the obstacle.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::{Agent, Vec2};
+    /// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+    ///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+    /// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(0.0, 0.0), ..a };
+    /// use tpt_algo_swarm::VelocityObstacle;
+    ///
+    /// let vo = VelocityObstacle::new(&a, &b, 10.0, 0.0);
+    /// assert!(vo.contains(Vec2::new(2.0, 0.0)));
+    /// assert!(!vo.contains(Vec2::new(-1.0, 0.0)));
+    /// ```
     #[must_use]
     pub fn contains(&self, v: Vec2) -> bool {
         self.time_to_collision(v).is_some()
@@ -178,6 +278,20 @@ impl VelocityObstacle {
 ///
 /// # Errors
 /// [`SwarmError::IndexOutOfRange`], plus validation errors.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{Agent, Vec2};
+/// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+/// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(0.0, 0.0), ..a };
+/// use tpt_algo_swarm::{avoid_among, AvoidanceConfig};
+///
+/// let agents = [a, b];
+/// let v = avoid_among(&agents, 0, &AvoidanceConfig::default()).unwrap();
+/// assert!(v.norm() <= a.max_speed + 1e-12);
+/// ```
 pub fn avoid_among(
     agents: &[Agent],
     index: usize,
@@ -207,6 +321,20 @@ pub fn avoid_among(
 ///
 /// # Errors
 /// [`SwarmError::InvalidAgent`] / [`SwarmError::InvalidConfig`].
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{Agent, Vec2};
+/// let a = Agent { position: Vec2::new(0.0, 0.0), velocity: Vec2::new(1.0, 0.0),
+///     radius: 0.5, preferred_velocity: Vec2::new(1.0, 0.0), max_speed: 1.0 };
+/// let b = Agent { position: Vec2::new(4.0, 0.0), velocity: Vec2::new(0.0, 0.0), ..a };
+/// use tpt_algo_swarm::{avoid, AvoidanceConfig};
+///
+/// // Agent a considers b as a neighbour and returns its new velocity.
+/// let v = avoid(&a, &[b], &AvoidanceConfig::default()).unwrap();
+/// assert!(v.is_finite());
+/// ```
 pub fn avoid(
     agent: &Agent,
     neighbors: &[Agent],

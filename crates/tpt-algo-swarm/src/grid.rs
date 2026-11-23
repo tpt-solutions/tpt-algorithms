@@ -9,6 +9,18 @@ use core::cmp::Reverse;
 use crate::SwarmError;
 
 /// Neighbourhood used by the search.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{find_path, Connectivity, Grid};
+///
+/// let grid = Grid::new(3, 3).unwrap();
+/// // Four-connected moves are axis-aligned only; eight-connected allows diagonals.
+/// let p4 = find_path(&grid, (0, 0), (2, 2), Connectivity::Four).unwrap();
+/// let p8 = find_path(&grid, (0, 0), (2, 2), Connectivity::Eight).unwrap();
+/// assert!(p8.cost < p4.cost);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Connectivity {
     /// Moves along the four axes (cost 1 each; Manhattan heuristic).
@@ -19,6 +31,17 @@ pub enum Connectivity {
 }
 
 /// A rectangular occupancy grid; cell `(x, y)` is stored at `y * width + x`.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::Grid;
+///
+/// let mut grid = Grid::new(3, 2).unwrap();
+/// grid.set_blocked(1, 0, true).unwrap();
+/// assert!(grid.is_blocked(1, 0).unwrap());
+/// assert_eq!((grid.width(), grid.height()), (3, 2));
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Grid {
     width: usize,
@@ -31,6 +54,15 @@ impl Grid {
     ///
     /// # Errors
     /// [`SwarmError::InvalidGrid`] if a dimension is zero or too large.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::Grid;
+    ///
+    /// let grid = Grid::new(4, 4).unwrap();
+    /// assert!(!grid.is_blocked(0, 0).unwrap()); // open by default
+    /// ```
     pub fn new(width: usize, height: usize) -> Result<Self, SwarmError> {
         if width == 0 || height == 0 {
             return Err(SwarmError::InvalidGrid("dimensions must be non-zero"));
@@ -49,6 +81,17 @@ impl Grid {
     ///
     /// # Errors
     /// [`SwarmError::InvalidGrid`] if `blocked.len() != width * height`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::Grid;
+    ///
+    /// // Row-major cells: index = y * width + x. Cell (1, 0) is blocked.
+    /// let grid = Grid::from_cells(2, 2, vec![false, true, false, false]).unwrap();
+    /// assert!(grid.is_blocked(1, 0).unwrap());
+    /// assert!(!grid.is_blocked(0, 0).unwrap());
+    /// ```
     pub fn from_cells(width: usize, height: usize, blocked: Vec<bool>) -> Result<Self, SwarmError> {
         let g = Self::new(width, height)?;
         if blocked.len() != g.blocked.len() {
@@ -58,12 +101,28 @@ impl Grid {
     }
 
     /// Grid width.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::Grid;
+    ///
+    /// assert_eq!(Grid::new(5, 2).unwrap().width(), 5);
+    /// ```
     #[must_use]
     pub fn width(&self) -> usize {
         self.width
     }
 
     /// Grid height.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::Grid;
+    ///
+    /// assert_eq!(Grid::new(5, 2).unwrap().height(), 2);
+    /// ```
     #[must_use]
     pub fn height(&self) -> usize {
         self.height
@@ -73,6 +132,17 @@ impl Grid {
     ///
     /// # Errors
     /// [`SwarmError::OutOfBounds`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::Grid;
+    ///
+    /// let mut grid = Grid::new(3, 3).unwrap();
+    /// grid.set_blocked(1, 1, true).unwrap();
+    /// grid.set_blocked(1, 1, false).unwrap(); // and unblock it again
+    /// assert!(!grid.is_blocked(1, 1).unwrap());
+    /// ```
     pub fn set_blocked(&mut self, x: usize, y: usize, blocked: bool) -> Result<(), SwarmError> {
         let i = self.index(x, y)?;
         self.blocked[i] = blocked;
@@ -83,6 +153,15 @@ impl Grid {
     ///
     /// # Errors
     /// [`SwarmError::OutOfBounds`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_swarm::{Grid, SwarmError};
+    ///
+    /// let grid = Grid::new(3, 3).unwrap();
+    /// assert!(matches!(grid.is_blocked(3, 0), Err(SwarmError::OutOfBounds { .. })));
+    /// ```
     pub fn is_blocked(&self, x: usize, y: usize) -> Result<bool, SwarmError> {
         Ok(self.blocked[self.index(x, y)?])
     }
@@ -96,6 +175,17 @@ impl Grid {
 }
 
 /// A path found by [`find_path`].
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{find_path, Connectivity, Grid};
+///
+/// let grid = Grid::new(3, 1).unwrap();
+/// let path = find_path(&grid, (0, 0), (2, 0), Connectivity::Four).unwrap();
+/// assert_eq!(path.cells, vec![(0, 0), (1, 0), (2, 0)]);
+/// assert_eq!(path.cost, 2.0);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct GridPath {
     /// Cells from start to goal inclusive.
@@ -131,6 +221,19 @@ fn heuristic(conn: Connectivity, x: usize, y: usize, gx: usize, gy: usize) -> u6
 /// # Errors
 /// [`SwarmError::OutOfBounds`], [`SwarmError::StartBlocked`],
 /// [`SwarmError::GoalBlocked`], [`SwarmError::Unreachable`].
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_swarm::{find_path, Connectivity, Grid, SwarmError};
+///
+/// let mut grid = Grid::new(3, 1).unwrap();
+/// grid.set_blocked(1, 0, true).unwrap(); // a wall across the only row
+/// assert!(matches!(
+///     find_path(&grid, (0, 0), (2, 0), Connectivity::Four),
+///     Err(SwarmError::Unreachable)
+/// ));
+/// ```
 pub fn find_path(
     grid: &Grid,
     start: (usize, usize),

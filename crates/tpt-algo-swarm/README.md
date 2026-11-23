@@ -9,7 +9,7 @@ Pre-release. Implements truncated-cone VO, a sampled reciprocal VO (RVO)
 avoidance step, a lock-step `Simulation`, and grid A*. ORCA (half-plane LP) is
 not implemented.
 
-## Features
+## Feature flags
 
 - `std` (default): implies `alloc`.
 - `alloc`: `Simulation`, `Grid`, `find_path`.
@@ -36,7 +36,7 @@ let v = avoid(&a, &[b], &AvoidanceConfig::default()).unwrap();
 assert!(v.norm() <= 1.0 + 1e-12);
 ```
 
-## Validation
+## Validation status
 
 Known-answer unit tests, proptest invariants (circle swaps and crossings:
 minimum clearance stays non-negative, all agents reach goals within a step
