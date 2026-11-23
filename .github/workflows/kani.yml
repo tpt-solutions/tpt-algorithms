@@ -1,0 +1,47 @@
+name: Kani (bounded model checking)
+
+# Kani is heavy (it downloads CBMC and symbolically executes each harness), so it
+# runs only when it can catch something: when the geometry crate or this workflow
+# changes, weekly, or on demand. It is never run locally; see docs/formal-verification.md.
+on:
+  pull_request:
+    paths:
+      - "internal/tpt-algo-geometry/**"
+      - ".github/workflows/kani.yml"
+  push:
+    branches: [master]
+    paths:
+      - "internal/tpt-algo-geometry/**"
+      - ".github/workflows/kani.yml"
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kani-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harness:
+    name: ${{ matrix.harness }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        harness:
+          - verification::negative_time_is_rejected
+          - verification::non_finite_input_is_rejected
+          - verification::bounded_inputs_give_finite_position
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run one Kani harness
+        uses: model-checking/kani-github-action@v1.1
+        with:
+          # Pinned: `latest` would make results change without a code change.
+          kani-version: "0.68.0"
+          command: cargo-kani
+          args: "-p tpt-algo-geometry --harness ${{ matrix.harness }}"

@@ -92,3 +92,61 @@ mod tests {
         );
     }
 }
+
+#[cfg(kani)]
+mod verification {
+    //! Bounded model-checking harnesses, run only by `cargo kani` (see
+    //! `.github/workflows/kani.yml`). They are compiled out of normal builds.
+    use super::*;
+
+    /// Magnitude bound for the arithmetic harness. Keeps the float reasoning
+    /// tractable while still covering realistic positions, speeds and times.
+    const BOUND: f64 = 1.0e3;
+
+    fn any_vec2() -> Vec2 {
+        Vec2::new(kani::any(), kani::any())
+    }
+
+    fn bounded(x: f64) -> bool {
+        (-BOUND..=BOUND).contains(&x)
+    }
+
+    /// Negative time is rejected whatever the positions and velocities are.
+    #[kani::proof]
+    fn negative_time_is_rejected() {
+        let t: f64 = kani::any();
+        kani::assume(t < 0.0);
+        let r = constant_accel_position(any_vec2(), any_vec2(), any_vec2(), t);
+        assert!(matches!(r, Err(GeometryError::NegativeTime)));
+    }
+
+    /// A non-finite position, velocity or acceleration is rejected when time is
+    /// non-negative.
+    #[kani::proof]
+    fn non_finite_input_is_rejected() {
+        let x0 = any_vec2();
+        let v0 = any_vec2();
+        let a = any_vec2();
+        let t: f64 = kani::any();
+        kani::assume(t >= 0.0);
+        kani::assume(!(x0.is_finite() && v0.is_finite() && a.is_finite()));
+        let r = constant_accel_position(x0, v0, a, t);
+        assert!(matches!(r, Err(GeometryError::NonFinite)));
+    }
+
+    /// Bounded, finite inputs with non-negative time give a finite position.
+    /// (Unbounded inputs can overflow to infinity while still returning `Ok`,
+    /// so the bound is a precondition of this property, not a convenience.)
+    #[kani::proof]
+    fn bounded_inputs_give_finite_position() {
+        let x0 = Vec2::new(kani::any(), kani::any());
+        let v0 = Vec2::new(kani::any(), kani::any());
+        let a = Vec2::new(kani::any(), kani::any());
+        let t: f64 = kani::any();
+        kani::assume(bounded(x0.x) && bounded(x0.y));
+        kani::assume(bounded(v0.x) && bounded(v0.y));
+        kani::assume(bounded(a.x) && bounded(a.y));
+        kani::assume((0.0..=BOUND).contains(&t));
+        assert!(matches!(constant_accel_position(x0, v0, a, t), Ok(p) if p.is_finite()));
+    }
+}

@@ -34,7 +34,7 @@ criterion = { version = "0.5", default-features = false }
 [workspace.lints.rust]
 unsafe_code = "forbid"
 missing_docs = "warn"
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(docsrs)'] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(docsrs)', 'cfg(kani)'] }
 
 [workspace.lints.clippy]
 unwrap_used = "deny"
