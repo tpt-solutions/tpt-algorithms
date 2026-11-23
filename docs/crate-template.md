@@ -8,6 +8,7 @@ Written for: contributors adding a crate under `crates/` (public) or `internal/`
 crates/tpt-algo-<name>/
 ├── Cargo.toml
 ├── README.md
+├── CHANGELOG.md
 ├── examples/<name>.rs
 ├── src/
 │   ├── lib.rs      # #![cfg_attr(not(feature = "std"), no_std)] + module docs
@@ -31,6 +32,8 @@ rust-version.workspace = true
 license.workspace = true
 description = "..."
 readme = "README.md"
+keywords = ["...", "..."]     # up to 5, each at most 20 characters
+categories = ["algorithms"]   # slugs from https://crates.io/categories
 
 [features]
 default = ["std"]
@@ -78,4 +81,6 @@ No `unwrap`, `expect` or `panic!` in non-test code (enforced by workspace clippy
 - [ ] `publish = false` for internal crates.
 - [ ] `cargo build --no-default-features` and the thumbv7em target build pass.
 - [ ] Clean-room notes and provenance entry written.
-- [ ] README with purpose, features, usage snippet, validation status.
+- [ ] README with purpose, status, features, installation, usage snippet, API overview, validation status, limitations, references and licence.
+- [ ] `CHANGELOG.md` in Keep a Changelog format, starting with an `[Unreleased]` section.
+- [ ] `keywords` (up to 5) and `categories` (valid crates.io slugs) in `Cargo.toml`.
