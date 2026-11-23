@@ -1,0 +1,28 @@
+[package]
+name = "tpt-algo-soc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Battery state-of-charge estimation via Extended Kalman Filter (RC equivalent circuit)"
+readme = "README.md"
+keywords = ["algorithms", "no-std", "soc"]
+categories = ["algorithms", "science", "no-std"]
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+serde = ["dep:serde"]
+
+[dependencies]
+libm.workspace = true
+serde = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tpt-algo-synth-data.workspace = true
+
+[lints]
+workspace = true
