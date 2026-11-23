@@ -1,6 +1,9 @@
 [package]
 name = "tpt-algo-bindings-core"
 description = "Internal binding-independent wrappers around tpt-algo-fraud and tpt-algo-soc (no FFI)."
+readme = "README.md"
+keywords = ["bindings", "wrapper", "fraud", "battery"]
+categories = ["api-bindings"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
