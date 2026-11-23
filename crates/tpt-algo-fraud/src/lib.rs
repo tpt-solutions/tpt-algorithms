@@ -57,6 +57,16 @@ const EULER_GAMMA: f64 = core::f64::consts::EULER_GAMMA;
 /// `c(n) = 2 H(n-1) - 2 (n-1) / n`, with `H(i) ~ ln(i) + gamma`.
 ///
 /// `c(0) = c(1) = 0` and `c(2) = 1`.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_fraud::average_path_length;
+///
+/// // c(1) = 0 and c(2) = 1, from the Isolation Forest paper.
+/// assert_eq!(average_path_length(1), 0.0);
+/// assert!((average_path_length(2) - 1.0).abs() < 1e-12);
+/// ```
 #[must_use]
 pub fn average_path_length(n: usize) -> f64 {
     match n {

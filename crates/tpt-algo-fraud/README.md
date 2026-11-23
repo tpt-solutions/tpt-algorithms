@@ -3,9 +3,12 @@
 Anomaly scoring with seeded Isolation Forests (Liu, Ting, Zhou, ICDM 2008;
 ACM TKDD 2012). Scores are in `[0, 1]`; higher means more anomalous.
 
-**Status:** implemented; pre-release.
+## Status
 
-## Features
+Pre-release (0.0.0). Isolation trees, forest and scoring are implemented and
+unit/property tested. Dataset validation is not yet performed.
+
+## Feature flags
 
 - `std` (default): implies `alloc`.
 - `alloc`: the `IsolationForest` type (needs `Vec`).
@@ -25,7 +28,7 @@ let forest = IsolationForest::fit(&cfg, &data).unwrap();
 let scores = forest.score_samples(&data).unwrap();
 ```
 
-## Validation
+## Validation status
 
 - Known-answer test for `c(n)`; proptest invariants (scores in `[0, 1]`,
   determinism by seed).

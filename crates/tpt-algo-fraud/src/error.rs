@@ -2,6 +2,19 @@
 //! Error type.
 
 /// Errors returned by this crate.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(feature = "alloc")] {
+/// use tpt_algo_fraud::{FraudError, IsolationForest, IsolationForestConfig};
+///
+/// // Rows must all have the same number of features.
+/// let rows = vec![vec![1.0, 2.0], vec![3.0]];
+/// let err = IsolationForest::fit(&IsolationForestConfig::default(), &rows).unwrap_err();
+/// assert!(matches!(err, FraudError::DimensionMismatch { row: 1, expected: 2, found: 1 }));
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum FraudError {
     /// The training data contained no rows.

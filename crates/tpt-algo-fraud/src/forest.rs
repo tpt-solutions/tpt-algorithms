@@ -127,6 +127,18 @@ fn grow(
 }
 
 /// A fitted Isolation Forest.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_fraud::{IsolationForest, IsolationForestConfig};
+///
+/// let data: Vec<Vec<f64>> = (0..50).map(|i| vec![f64::from(i) * 0.01, 0.0]).collect();
+/// let forest = IsolationForest::fit(&IsolationForestConfig::default().with_seed(3), &data).unwrap();
+/// assert_eq!(forest.dimension(), 2);
+/// let scores = forest.score_samples(&data).unwrap();
+/// assert!(scores.iter().all(|s| (0.0..=1.0).contains(s)));
+/// ```
 #[derive(Debug, Clone)]
 pub struct IsolationForest {
     trees: Vec<Tree>,
@@ -141,6 +153,18 @@ impl IsolationForest {
     /// # Errors
     /// Invalid configuration, empty data, zero-width rows, inconsistent row
     /// lengths or non-finite values.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_fraud::{FraudError, IsolationForest, IsolationForestConfig};
+    ///
+    /// let empty: Vec<Vec<f64>> = Vec::new();
+    /// assert_eq!(
+    ///     IsolationForest::fit(&IsolationForestConfig::default(), &empty).unwrap_err(),
+    ///     FraudError::EmptyData
+    /// );
+    /// ```
     pub fn fit<R: AsRef<[f64]>>(
         config: &IsolationForestConfig,
         data: &[R],
@@ -172,12 +196,36 @@ impl IsolationForest {
     }
 
     /// Number of features per row.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_fraud::{IsolationForest, IsolationForestConfig};
+    ///
+    /// let data: Vec<Vec<f64>> = (0..200)
+    ///     .map(|i| vec![f64::from(i % 10) * 0.1, f64::from(i % 7) * 0.1])
+    ///     .collect();
+    /// let forest = IsolationForest::fit(&IsolationForestConfig::default().with_seed(1), &data).unwrap();
+    /// assert_eq!(forest.dimension(), 2);
+    /// ```
     #[must_use]
     pub fn dimension(&self) -> usize {
         self.dim
     }
 
     /// Number of trees.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_fraud::{IsolationForest, IsolationForestConfig};
+    ///
+    /// let data: Vec<Vec<f64>> = (0..200)
+    ///     .map(|i| vec![f64::from(i % 10) * 0.1, f64::from(i % 7) * 0.1])
+    ///     .collect();
+    /// let forest = IsolationForest::fit(&IsolationForestConfig::default().with_trees(25), &data).unwrap();
+    /// assert_eq!(forest.n_trees(), 25);
+    /// ```
     #[must_use]
     pub fn n_trees(&self) -> usize {
         self.trees.len()
@@ -187,6 +235,21 @@ impl IsolationForest {
     ///
     /// # Errors
     /// Wrong dimension or non-finite value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_fraud::{IsolationForest, IsolationForestConfig};
+    ///
+    /// let data: Vec<Vec<f64>> = (0..200)
+    ///     .map(|i| vec![f64::from(i % 10) * 0.1, f64::from(i % 7) * 0.1])
+    ///     .collect();
+    /// let forest = IsolationForest::fit(&IsolationForestConfig::default().with_seed(1), &data).unwrap();
+    /// // Short average path length means the point is easy to isolate, hence anomalous.
+    /// let outlier = forest.mean_path_length(&[50.0, 50.0]).unwrap();
+    /// let inlier = forest.mean_path_length(&[0.3, 0.3]).unwrap();
+    /// assert!(outlier < inlier);
+    /// ```
     pub fn mean_path_length(&self, x: &[f64]) -> Result<f64, FraudError> {
         if x.len() != self.dim {
             return Err(FraudError::DimensionMismatch {
@@ -207,6 +270,20 @@ impl IsolationForest {
     ///
     /// # Errors
     /// Wrong dimension or non-finite value.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_fraud::{IsolationForest, IsolationForestConfig};
+    ///
+    /// let data: Vec<Vec<f64>> = (0..200)
+    ///     .map(|i| vec![f64::from(i % 10) * 0.1, f64::from(i % 7) * 0.1])
+    ///     .collect();
+    /// let forest = IsolationForest::fit(&IsolationForestConfig::default().with_seed(1), &data).unwrap();
+    /// let s = forest.score(&[50.0, 50.0]).unwrap();
+    /// assert!((0.0..=1.0).contains(&s));
+    /// assert!(s > 0.5); // far from the cluster: anomalous
+    /// ```
     pub fn score(&self, x: &[f64]) -> Result<f64, FraudError> {
         let e = self.mean_path_length(x)?;
         let c = average_path_length(self.psi);
@@ -221,6 +298,19 @@ impl IsolationForest {
     /// # Errors
     /// The first row with wrong dimension or non-finite value is reported
     /// with its index.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_fraud::{IsolationForest, IsolationForestConfig};
+    ///
+    /// let data: Vec<Vec<f64>> = (0..200)
+    ///     .map(|i| vec![f64::from(i % 10) * 0.1, f64::from(i % 7) * 0.1])
+    ///     .collect();
+    /// let forest = IsolationForest::fit(&IsolationForestConfig::default().with_seed(1), &data).unwrap();
+    /// let scores = forest.score_samples(&data).unwrap();
+    /// assert_eq!(scores.len(), data.len());
+    /// ```
     pub fn score_samples<R: AsRef<[f64]>>(&self, data: &[R]) -> Result<Vec<f64>, FraudError> {
         data.iter()
             .enumerate()
