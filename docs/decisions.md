@@ -10,11 +10,12 @@ Written for: maintainers. Records each decision so it can be revisited with the 
 | D4 | Default-no-std | Every crate `#![cfg_attr(not(feature = "std"), no_std)]`, features `std`, `alloc`, `serde` | Spec §4.1. |
 | D5 | Internal crates may not be depended on by public crates | Public algorithm crates have no runtime dependency on `tpt-algo-math-core`, `-geometry` or `-synth-data` | Those are `publish = false`; a publishable crate cannot depend on an unpublished one. Shared code is therefore duplicated in small private helpers. Revisit if internal crates are later published. |
 | D6 | Maintainer contact in crate metadata | **Open.** Not set. | Needs the maintainer's decision on which address to publish. |
-| D7 | Python / WASM bindings (Phase 16) | **No-go for v0.1.** Deferred to a post-v0.1 milestone. | Keeps v0.1 scope to Rust crates. Revisit once the core crates pass their validation. |
+| D7 | Python / WASM bindings (Phase 16) | **Go for v0.1** (reversed by the maintainer; previously no-go). Bindings are separate, unpublished crates `tpt-algo-py` (pyo3 + maturin) and `tpt-algo-wasm` (wasm-bindgen), covering `tpt-algo-soc` and `tpt-algo-fraud`. | The maintainer asked for bindings in v0.1. Binding crates depend on public crates, so they are never a dependency of a published crate. Publishing to PyPI and npm is set up as a manual-trigger workflow and is not run until the maintainer approves. |
 | D8 | Dependency update bot | Dependabot (`.github/dependabot.yml`) | Native to GitHub; no extra app. |
 | D9 | Versioning | 0.x until validated; semver afterwards | Spec §8.2 / todo Phase 5. |
-| D11 | Kani spike host | Run on Linux or WSL | Kani supports Linux and macOS only, so it cannot run on this Windows machine. |
+| D11 | Kani verification host | **CI only** (Linux runner, path-filtered and scheduled, one harness per run) | Kani is heavy (CBMC download and bounded model checking). It is not run locally; the CI job is the only place it runs. |
 | D10 | Formal verification | Contract helpers (debug assertions) for all crates; kani spike on one function (see [formal-verification.md](formal-verification.md)); prusti not adopted | prusti is unmaintained. |
+| D12 | `target-lexicon` (pulled in by pyo3's build configuration) | Replaced via `[patch.crates-io]` with `tpt-solutions/target-lexicon-mit`, pinned to commit `297f442a`; `deny.toml` allows that git source only | Upstream is `Apache-2.0 WITH LLVM-exception`, which spec section 5.1 bans. The replacement is MIT-only, build-time only, and API-compatible for pyo3's use. |
 
 ## Items that need external action (not done in this repository)
 

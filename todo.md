@@ -97,7 +97,7 @@ Owner: TPT Solutions · License: MIT OR Apache-2.0 (own code) · Dependencies: n
 - [x] Define versioning policy (0.x until validated, semver afterwards) — _docs/decisions.md D9_
 
 ## Phase 6 — Testing & validation framework
-- [~] proptest conventions and shared strategies — _partial: conventions in docs/testing.md; shared strategies not written_
+- [~] proptest conventions and shared strategies — _partial: conventions in docs/testing.md; generic strategies in math-core `strategies` (feature `proptest`), used by soc only; domain strategies stay per crate_
 - [x] Criterion bench harness in `benches/` — _benches/ crate; primitives only_
 - [x] Dataset fetch tool (`scripts/` or xtask): download on demand, verify SHA-256, cache in gitignored dir — _scripts/fetch-dataset.sh; digest check tested locally_
 - [~] Record each dataset's source URL, license/terms, and checksum — _partial: URLs and terms in docs/datasets.md; SHA-256 TBD until fetched_
@@ -205,24 +205,24 @@ Owner: TPT Solutions · License: MIT OR Apache-2.0 (own code) · Dependencies: n
 ## Phase 14 — Formal verification & contracts
 - [~] Review all crates for type-state opportunities (invalid states unrepresentable) — _partial: done for soc and consensus; not reviewed for others_
 - [x] Contract macro/helpers: `requires`/`ensures` as `debug_assert` checks — _requires!/ensures! in tpt-algo-math-core; public crates not yet using them_
-- [ ] Apply contracts to physical/logical limits (SoC range, quantities, capacities) — _todo_
-- [ ] Spike an optional verifier (kani or creusot) on one critical function; record result — _blocked: Kani supports Linux/macOS only; run on Linux or WSL_
+- [~] Apply contracts to physical/logical limits (SoC range, quantities, capacities) — _partial: debug_assert in soc (covariance PSD on predict/update), orderbook (quantity conservation per event), routing (feasibility after each move); public crates cannot depend on unpublished math-core, so they use debug_assert! directly; soc range/quantity contracts not yet covered by a dedicated test_
+- [~] Spike an optional verifier (kani) on one critical function; record result — _partial: three harnesses on geometry `constant_accel_position` in `kinematics.rs` (cfg(kani)); CI-only job `.github/workflows/kani.yml` (Kani 0.68.0, one matrix job per harness); not yet run, result to be recorded in docs/formal-verification.md_
 - [x] Document the verification approach (prusti not adopted: unmaintained) — _docs/formal-verification.md_
 
 ## Phase 15 — Documentation
 - [x] Root README (purpose, crate list, licensing, status)
-- [~] Per-crate README audit (consistent structure, examples compile) — _partial: written per crate, not audited for consistency_
+- [x] Per-crate README audit (consistent structure, examples compile) — _section headings aligned across the six public crates; README usage snippets mirrored as crate-level doctests in soc, routing, swarm (fraud already had one)_
 - [x] docs.rs metadata (features, `docsrs` cfg) — _all-features and docsrs cfg set for each public crate_
-- [~] Doc tests for every public API — _partial: some crates only_
+- [x] Doc tests for every public API — _every public type, function and method in the six public crates has a runnable example (215 doctests across the six crates); checked with cargo test (default, no-default, all-features); the private `Sealed` trait is excluded_
 - [x] mdBook or docs site: overview, design principles, validation methodology — _book.toml + docs/SUMMARY.md; `mdbook build` clean_
 - [x] Contributing guide for dependencies and clean-room rules (brief) — _CONTRIBUTING.md_
 
 ## Phase 16 — Python / WASM bindings (optional)
-- [x] Decide go/no-go and which crates — _no-go for v0.1; docs/decisions.md D7_
-- [ ] License-check pyo3 / maturin / wasm-bindgen trees against deny.toml — _todo: deferred (D7)_
-- [ ] Separate binding crates (unpublished or separately named), feature-gated — _todo: deferred (D7)_
-- [ ] Build and test in CI — _todo: deferred (D7)_
-- [ ] Publish (PyPI / npm) workflow — _todo: deferred (D7)_
+- [x] Decide go/no-go and which crates — _go for v0.1 (D7 reversed); soc and fraud, via internal `tpt-algo-bindings-core`_
+- [x] License-check pyo3 / maturin / wasm-bindgen trees against deny.toml — _all three pass; `target-lexicon` 0.13.6 (Apache-2.0 WITH LLVM-exception, build-only) patched with tpt-solutions/target-lexicon-mit at 297f442a; deny.toml allows that one git source; see docs/bindings.md_
+- [x] Separate binding crates (unpublished or separately named), feature-gated — _`crates/tpt-algo-py` (pyo3, feature `extension-module`), `crates/tpt-algo-wasm`; both excluded from the root workspace_
+- [x] Build and test in CI — _`.github/workflows/bindings.yml`: wasm tests in Node, Python wheel build and unittest on Ubuntu and Windows; not yet run on GitHub_
+- [x] Publish (PyPI / npm) workflow — _`.github/workflows/bindings-publish.yml`, manual only, publishes nothing by default; not run; needs `pypi` and `npm` environments and an NPM_TOKEN secret_
 
 ## Phase 17 — v0.1 launch
 - [~] Final `cargo deny`, `cargo audit`, full CI green on all crates — _partial: local deny and audit pass; CI not run on GitHub_
