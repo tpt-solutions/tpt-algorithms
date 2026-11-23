@@ -1,0 +1,23 @@
+[package]
+name = "tpt-algo-synth-data"
+description = "Internal deterministic synthetic data generators (seeded, reproducible)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[features]
+default = ["std"]
+std = ["alloc", "tpt-algo-math-core/std"]
+alloc = ["tpt-algo-math-core/alloc"]
+serde = ["dep:serde", "tpt-algo-math-core/serde"]
+
+[dependencies]
+libm.workspace = true
+serde = { workspace = true, optional = true }
+thiserror.workspace = true
+tpt-algo-math-core = { workspace = true, default-features = false }
+
+[lints]
+workspace = true
