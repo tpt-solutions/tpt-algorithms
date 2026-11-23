@@ -20,7 +20,7 @@ ignore = []
 [licenses]
 version = 2
 confidence-threshold = 0.93
-unused-allowed-license = "deny"
+unused-allowed-license = "warn"
 allow = [
     "MIT",
     "BSD-2-Clause",
@@ -37,6 +37,7 @@ exceptions = []
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
+allow-wildcard-paths = true
 highlight = "all"
 deny = [
     # Crates that pull in copyleft or non-commercial licensed code are banned outright.

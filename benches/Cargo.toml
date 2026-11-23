@@ -1,0 +1,20 @@
+[package]
+name = "tpt-algo-benches"
+description = "Cross-crate Criterion benchmark suite (not published)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dev-dependencies]
+criterion.workspace = true
+tpt-algo-math-core.workspace = true
+tpt-algo-synth-data.workspace = true
+
+[[bench]]
+name = "primitives"
+harness = false
+
+[lints]
+workspace = true

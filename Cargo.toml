@@ -4,6 +4,7 @@ members = [
     "internal/tpt-algo-math-core",
     "internal/tpt-algo-geometry",
     "internal/tpt-algo-synth-data",
+    "benches",
     "crates/tpt-algo-soc",
     "crates/tpt-algo-fraud",
     "crates/tpt-algo-orderbook",
@@ -20,8 +21,7 @@ license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 # Internal (unpublished) crates
-tpt-algo-math-core = { path = "internal/tpt-algo-math-core" }
-tpt-algo-geometry = { path = "internal/tpt-algo-geometry" }
+tpt-algo-math-core = { path = "internal/tpt-algo-math-core", default-features = false }
 tpt-algo-synth-data = { path = "internal/tpt-algo-synth-data" }
 
 # Third-party (all MIT OR Apache-2.0 or MIT-compatible; see deny.toml)
@@ -29,6 +29,7 @@ libm = { version = "0.2", default-features = false }
 proptest = "1"
 serde = { version = "1", default-features = false, features = ["derive"] }
 thiserror = { version = "2", default-features = false }
+criterion = { version = "0.5", default-features = false }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -17,7 +17,7 @@ serde = ["dep:serde", "tpt-algo-math-core/serde"]
 libm.workspace = true
 serde = { workspace = true, optional = true }
 thiserror.workspace = true
-tpt-algo-math-core = { workspace = true, default-features = false }
+tpt-algo-math-core.workspace = true
 
 [lints]
 workspace = true
