@@ -18,7 +18,10 @@ impl Aabb2 {
     pub fn from_points<I: IntoIterator<Item = Vec2>>(points: I) -> Option<Self> {
         let mut it = points.into_iter();
         let first = it.next()?;
-        let mut bb = Aabb2 { min: first, max: first };
+        let mut bb = Aabb2 {
+            min: first,
+            max: first,
+        };
         for p in it {
             bb.min.x = bb.min.x.min(p.x);
             bb.min.y = bb.min.y.min(p.y);
@@ -35,7 +38,10 @@ impl Aabb2 {
 
     /// True when the two boxes overlap (touching counts as overlap).
     pub fn intersects(&self, o: &Aabb2) -> bool {
-        self.min.x <= o.max.x && o.min.x <= self.max.x && self.min.y <= o.max.y && o.min.y <= self.max.y
+        self.min.x <= o.max.x
+            && o.min.x <= self.max.x
+            && self.min.y <= o.max.y
+            && o.min.y <= self.max.y
     }
 }
 
@@ -80,8 +86,15 @@ mod tests {
 
     #[test]
     fn aabb_from_points_and_contains() {
-        let pts = [Vec2::new(0.0, 0.0), Vec2::new(2.0, -1.0), Vec2::new(1.0, 3.0)];
-        let bb = Aabb2::from_points(pts).unwrap_or(Aabb2 { min: Vec2::default(), max: Vec2::default() });
+        let pts = [
+            Vec2::new(0.0, 0.0),
+            Vec2::new(2.0, -1.0),
+            Vec2::new(1.0, 3.0),
+        ];
+        let bb = Aabb2::from_points(pts).unwrap_or(Aabb2 {
+            min: Vec2::default(),
+            max: Vec2::default(),
+        });
         assert_eq!(bb.min, Vec2::new(0.0, -1.0));
         assert_eq!(bb.max, Vec2::new(2.0, 3.0));
         assert!(bb.contains(Vec2::new(1.0, 1.0)));
@@ -121,7 +134,17 @@ mod tests {
 
     #[test]
     fn circles_touching_overlap() {
-        assert!(circles_overlap(Vec2::new(0.0, 0.0), 1.0, Vec2::new(2.0, 0.0), 1.0));
-        assert!(!circles_overlap(Vec2::new(0.0, 0.0), 1.0, Vec2::new(3.0, 0.0), 1.0));
+        assert!(circles_overlap(
+            Vec2::new(0.0, 0.0),
+            1.0,
+            Vec2::new(2.0, 0.0),
+            1.0
+        ));
+        assert!(!circles_overlap(
+            Vec2::new(0.0, 0.0),
+            1.0,
+            Vec2::new(3.0, 0.0),
+            1.0
+        ));
     }
 }

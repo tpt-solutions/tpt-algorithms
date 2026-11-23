@@ -170,8 +170,14 @@ mod tests {
 
     #[test]
     fn normalize_rejects_zero() {
-        assert_eq!(Vec2::new(0.0, 0.0).normalized(), Err(GeometryError::Degenerate));
-        assert_eq!(Vec2::new(f64::NAN, 0.0).normalized(), Err(GeometryError::NonFinite));
+        assert_eq!(
+            Vec2::new(0.0, 0.0).normalized(),
+            Err(GeometryError::Degenerate)
+        );
+        assert_eq!(
+            Vec2::new(f64::NAN, 0.0).normalized(),
+            Err(GeometryError::NonFinite)
+        );
         let u = Vec2::new(0.0, 2.0).normalized().unwrap_or_default();
         assert_eq!(u, Vec2::new(0.0, 1.0));
     }

@@ -66,9 +66,16 @@ mod tests {
     fn cvrp_is_reproducible_and_feasible() {
         let a = cvrp_uniform(5, 30, 100.0, 10);
         assert_eq!(a, cvrp_uniform(5, 30, 100.0, 10));
-        let inst = a.unwrap_or(CvrpInstance { depot: (0.0, 0.0), customers: Vec::new(), capacity: 0 });
+        let inst = a.unwrap_or(CvrpInstance {
+            depot: (0.0, 0.0),
+            customers: Vec::new(),
+            capacity: 0,
+        });
         assert_eq!(inst.customers.len(), 30);
-        assert!(inst.customers.iter().all(|c| c.demand >= 1 && c.demand <= inst.capacity));
+        assert!(inst
+            .customers
+            .iter()
+            .all(|c| c.demand >= 1 && c.demand <= inst.capacity));
     }
 
     #[test]

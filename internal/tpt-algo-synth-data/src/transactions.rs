@@ -17,13 +17,24 @@ pub struct Transaction {
 /// Generates `n` transactions: normal amounts are log-normal with parameters `(mu, sigma)`
 /// in log-space; each transaction is an anomaly with probability `anomaly_rate`, in which
 /// case its amount is multiplied by `anomaly_scale`.
-pub fn transactions(seed: u64, n: usize, mu: f64, sigma: f64, anomaly_rate: f64, anomaly_scale: f64) -> Vec<Transaction> {
+pub fn transactions(
+    seed: u64,
+    n: usize,
+    mu: f64,
+    sigma: f64,
+    anomaly_rate: f64,
+    anomaly_scale: f64,
+) -> Vec<Transaction> {
     let mut rng = SplitMix64::new(seed);
     (0..n)
         .map(|_| {
             let base = libm::exp(mu + sigma * standard_normal(&mut rng));
             let is_anomaly = rng.next_f64() < anomaly_rate;
-            let amount = if is_anomaly { base * anomaly_scale } else { base };
+            let amount = if is_anomaly {
+                base * anomaly_scale
+            } else {
+                base
+            };
             Transaction { amount, is_anomaly }
         })
         .collect()

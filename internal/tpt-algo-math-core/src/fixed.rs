@@ -56,19 +56,27 @@ impl Fixed {
 
     /// Checked addition.
     pub fn checked_add(self, rhs: Self) -> Result<Self, MathError> {
-        self.0.checked_add(rhs.0).map(Fixed).ok_or(MathError::Overflow)
+        self.0
+            .checked_add(rhs.0)
+            .map(Fixed)
+            .ok_or(MathError::Overflow)
     }
 
     /// Checked subtraction.
     pub fn checked_sub(self, rhs: Self) -> Result<Self, MathError> {
-        self.0.checked_sub(rhs.0).map(Fixed).ok_or(MathError::Overflow)
+        self.0
+            .checked_sub(rhs.0)
+            .map(Fixed)
+            .ok_or(MathError::Overflow)
     }
 
     /// Checked multiplication. The discarded fraction is truncated toward negative infinity.
     pub fn checked_mul(self, rhs: Self) -> Result<Self, MathError> {
         let wide = (self.0 as i128) * (rhs.0 as i128);
         let shifted = wide >> FRAC_BITS;
-        i64::try_from(shifted).map(Fixed).map_err(|_| MathError::Overflow)
+        i64::try_from(shifted)
+            .map(Fixed)
+            .map_err(|_| MathError::Overflow)
     }
 
     /// Checked division. Fails on division by zero or overflow.
@@ -77,7 +85,9 @@ impl Fixed {
             return Err(MathError::Overflow);
         }
         let wide = ((self.0 as i128) << FRAC_BITS) / (rhs.0 as i128);
-        i64::try_from(wide).map(Fixed).map_err(|_| MathError::Overflow)
+        i64::try_from(wide)
+            .map(Fixed)
+            .map_err(|_| MathError::Overflow)
     }
 }
 
@@ -108,7 +118,10 @@ mod tests {
 
     #[test]
     fn div_by_zero_is_error() {
-        assert_eq!(Fixed::ONE.checked_div(Fixed::ZERO), Err(MathError::Overflow));
+        assert_eq!(
+            Fixed::ONE.checked_div(Fixed::ZERO),
+            Err(MathError::Overflow)
+        );
     }
 
     #[test]
@@ -116,6 +129,9 @@ mod tests {
         assert_eq!(Fixed::from_int(i64::MAX), Err(MathError::Overflow));
         assert_eq!(Fixed::from_f64(f64::NAN), Err(MathError::NonFinite));
         assert_eq!(Fixed::from_f64(1e300), Err(MathError::Overflow));
-        assert_eq!(Fixed::from_raw(i64::MAX).checked_add(Fixed::ONE), Err(MathError::Overflow));
+        assert_eq!(
+            Fixed::from_raw(i64::MAX).checked_add(Fixed::ONE),
+            Err(MathError::Overflow)
+        );
     }
 }

@@ -27,22 +27,38 @@ pub struct OrderEvent {
 /// Generates `n` limit-order events around `mid_ticks`, with prices offset by up to
 /// `max_offset_ticks` from the mid and quantities in `1..=max_qty`.
 /// Returns an empty vector if `max_qty == 0`.
-pub fn limit_orders(seed: u64, n: usize, mid_ticks: i64, max_offset_ticks: u64, max_qty: u64) -> Vec<OrderEvent> {
+pub fn limit_orders(
+    seed: u64,
+    n: usize,
+    mid_ticks: i64,
+    max_offset_ticks: u64,
+    max_qty: u64,
+) -> Vec<OrderEvent> {
     if max_qty == 0 {
         return Vec::new();
     }
     let mut rng = SplitMix64::new(seed);
     let mut out = Vec::with_capacity(n);
     for _ in 0..n {
-        let side = if rng.next_u64() & 1 == 0 { Side::Bid } else { Side::Ask };
-        let offset = rng.next_below(max_offset_ticks.saturating_add(1)).unwrap_or(0) as i64;
+        let side = if rng.next_u64() & 1 == 0 {
+            Side::Bid
+        } else {
+            Side::Ask
+        };
+        let offset = rng
+            .next_below(max_offset_ticks.saturating_add(1))
+            .unwrap_or(0) as i64;
         // Bids sit at or below mid, asks at or above, so generated flow starts uncrossed.
         let price_ticks = match side {
             Side::Bid => mid_ticks.saturating_sub(offset.max(1)),
             Side::Ask => mid_ticks.saturating_add(offset.max(1)),
         };
         let qty = rng.next_below(max_qty).unwrap_or(0).saturating_add(1);
-        out.push(OrderEvent { side, price_ticks, qty });
+        out.push(OrderEvent {
+            side,
+            price_ticks,
+            qty,
+        });
     }
     out
 }
