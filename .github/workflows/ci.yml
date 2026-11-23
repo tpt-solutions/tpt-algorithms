@@ -17,7 +17,7 @@ jobs:
     name: fmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
@@ -27,7 +27,7 @@ jobs:
     name: clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
@@ -42,7 +42,7 @@ jobs:
       matrix:
         features: ["", "--no-default-features", "--all-features"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace ${{ matrix.features }}
@@ -51,7 +51,7 @@ jobs:
     name: no_std build (thumbv7em-none-eabihf)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: thumbv7em-none-eabihf
@@ -70,7 +70,7 @@ jobs:
       matrix:
         features: ["--no-default-features", "--no-default-features --features alloc", "--features std", "--features serde", "--all-features"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: |
@@ -83,7 +83,7 @@ jobs:
     name: MSRV (1.98)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.98
       - uses: Swatinem/rust-cache@v2
       - run: cargo check --workspace --all-targets
@@ -94,7 +94,7 @@ jobs:
     env:
       RUSTDOCFLAGS: "-D warnings"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo doc --workspace --no-deps
@@ -103,7 +103,7 @@ jobs:
     name: benches compile (not run)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo bench --workspace --no-run
@@ -112,7 +112,7 @@ jobs:
     name: cargo deny
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check
@@ -121,7 +121,7 @@ jobs:
     name: cargo audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: rustsec/audit-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
