@@ -9,11 +9,28 @@ use crate::types::{Config, ReplicaId, SignerSet, View};
 /// The digest is a deterministic, non-cryptographic mixing function. It is
 /// adequate for simulation and testing; it is NOT collision resistant against
 /// an adversary (see the crate-level limitations).
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::{Block, BlockId};
+///
+/// let b = Block::genesis();
+/// assert_eq!(b.id, BlockId(0));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BlockId(pub u64);
 
 /// Id of the genesis block.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::{Block, GENESIS_ID};
+///
+/// assert_eq!(Block::genesis().id, GENESIS_ID);
+/// ```
 pub const GENESIS_ID: BlockId = BlockId(0);
 
 /// 64-bit finalizer from SplitMix64 (Steele, Lea, Flood 2014).
@@ -32,6 +49,23 @@ const fn absorb(h: u64, v: u64) -> u64 {
 ///
 /// Signatures are represented only by the signer set; this crate does not
 /// verify cryptographic signatures (see the crate-level limitations).
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// let b = Block::genesis();
+/// assert!(cert(&b).signers.len() == 3);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QuorumCert {
@@ -45,6 +79,16 @@ pub struct QuorumCert {
 
 impl QuorumCert {
     /// The implicit certificate for the genesis block (view 0, no signers).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::QuorumCert;
+    ///
+    /// // The genesis certificate has no signers and certifies the genesis block.
+    /// assert!(QuorumCert::genesis().is_genesis());
+    /// assert!(QuorumCert::genesis().signers.is_empty());
+    /// ```
     #[must_use]
     pub const fn genesis() -> Self {
         Self {
@@ -55,6 +99,14 @@ impl QuorumCert {
     }
 
     /// Whether this certifies the genesis block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::QuorumCert;
+    ///
+    /// assert!(QuorumCert::genesis().is_genesis());
+    /// ```
     #[must_use]
     pub fn is_genesis(&self) -> bool {
         self.block == GENESIS_ID
@@ -67,6 +119,32 @@ impl QuorumCert {
     /// # Errors
     /// [`ConsensusError::InvalidQuorumCert`] or
     /// [`ConsensusError::InsufficientSigners`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// assert!(cert(&b1).validate(&Config::new(4)?).is_ok());
+    /// // An empty signer set is below quorum (3 when n = 4).
+    /// let mut weak = cert(&b1);
+    /// weak.signers = SignerSet::new();
+    /// assert!(weak.validate(&Config::new(4)?).is_err());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn validate(&self, config: &Config) -> Result<(), ConsensusError> {
         if self.is_genesis() {
             return if self.view == View::GENESIS {
@@ -91,6 +169,29 @@ impl QuorumCert {
 
 /// A block of the chained protocol. Each block extends `parent` and carries
 /// `justify`, a quorum certificate for that parent.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// use tpt_algo_consensus::Block;
+///
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// assert_eq!(b1.height, 1);
+/// assert_eq!(b1.payload, 10);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Block {
@@ -112,6 +213,16 @@ pub struct Block {
 
 impl Block {
     /// The genesis block (view 0, height 0).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{Block, GENESIS_ID};
+    ///
+    /// let g = Block::genesis();
+    /// assert_eq!(g.id, GENESIS_ID);
+    /// assert_eq!(g.height, 0);
+    /// ```
     #[must_use]
     pub const fn genesis() -> Self {
         Self {
@@ -126,6 +237,14 @@ impl Block {
     }
 
     /// Whether this is the genesis block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Block;
+    ///
+    /// assert!(Block::genesis().is_genesis());
+    /// ```
     #[must_use]
     pub fn is_genesis(&self) -> bool {
         self.id == GENESIS_ID
@@ -137,6 +256,29 @@ impl Block {
     /// [`ConsensusError::QcMismatch`] if `justify` does not certify `parent`
     /// in `parent.view`; [`ConsensusError::NonIncreasingView`] if
     /// `view <= parent.view`; [`ConsensusError::Overflow`] on height overflow.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::Block;
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// // The view must increase and the justification must certify the parent.
+    /// assert!(Block::new(&b1, View(1), ReplicaId(2), 11, cert(&b1)).is_err());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(
         parent: &Block,
         view: View,
@@ -167,6 +309,17 @@ impl Block {
     }
 
     /// Deterministic digest of the block fields. Never returns [`GENESIS_ID`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{Block, BlockId, ReplicaId, View};
+    ///
+    /// let id = Block::compute_id(BlockId(7), View(2), 3, ReplicaId(1), 42, View(1));
+    /// // Identical fields always give the same digest.
+    /// assert_eq!(id, Block::compute_id(BlockId(7), View(2), 3, ReplicaId(1), 42, View(1)));
+    /// assert_ne!(id, BlockId(0));
+    /// ```
     #[must_use]
     pub fn compute_id(
         parent: BlockId,
@@ -187,6 +340,28 @@ impl Block {
     }
 
     /// Whether `id` matches the digest of the other fields.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::Block;
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// assert!(b1.has_valid_id());
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn has_valid_id(&self) -> bool {
         self.id

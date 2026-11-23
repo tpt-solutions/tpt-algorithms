@@ -40,18 +40,131 @@ mod sealed {
 }
 
 /// Marker trait for protocol phases. Sealed: only the four markers below.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::{Commit, Phase, Prepare};
+///
+/// // Only the four protocol phases implement the sealed `Phase` trait.
+/// fn assert_phase<P: Phase>() {}
+/// assert_phase::<Prepare>();
+/// assert_phase::<Commit>();
+/// ```
 pub trait Phase: sealed::Sealed + core::fmt::Debug + Copy {}
 
 /// Phase marker: proposed, not yet certified.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// use tpt_algo_consensus::{Block, Config, Round};
+///
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let round = Round::propose(&b1); // Round<Prepare>
+/// assert_eq!(round.block_id(), b1.id);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Prepare;
 /// Phase marker: certified by a quorum certificate.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// use tpt_algo_consensus::{Block, Config, Round};
+///
+/// let cfg = Config::new(4)?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// // Prepare -> PreCommit once b1 is certified.
+/// let pre: Round<_> = Round::propose(&b1).certify(&cert(&b1), &cfg)?;
+/// assert_eq!(pre.view(), View(1));
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PreCommit;
 /// Phase marker: locked (two-chain of consecutive-view certified blocks).
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// use tpt_algo_consensus::{Block, Round};
+///
+/// let cfg = Config::new(4)?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+/// let commit = Round::propose(&b1).certify(&cert(&b1), &cfg)?.lock(&b2, &cert(&b2), &cfg)?;
+/// assert_eq!(commit.block_id(), b1.id);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Commit;
 /// Phase marker: decided (three-chain of consecutive-view certified blocks).
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// use tpt_algo_consensus::{Block, Round};
+///
+/// let cfg = Config::new(4)?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+/// let b3 = Block::new(&b2, View(3), ReplicaId(3), 12, cert(&b2))?;
+/// let decided = Round::propose(&b1)
+///     .certify(&cert(&b1), &cfg)?
+///     .lock(&b2, &cert(&b2), &cfg)?
+///     .decide(&b3, &cert(&b3), &cfg)?;
+/// assert_eq!(decided.block_id(), b1.id); // b1 is final
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Decide;
 
@@ -65,6 +178,30 @@ impl Phase for Commit {}
 impl Phase for Decide {}
 
 /// Progress of one block through the HotStuff phases; `P` is the phase.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::*;
+///
+/// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+/// fn cert(b: &Block) -> QuorumCert {
+///     let mut signers = SignerSet::new();
+///     for i in 0..3u16 {
+///         signers.insert(ReplicaId(i)).unwrap();
+///     }
+///     QuorumCert { view: b.view, block: b.id, signers }
+/// }
+/// use tpt_algo_consensus::{Block, Round};
+///
+/// let cfg = Config::new(4)?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let round = Round::propose(&b1).certify(&cert(&b1), &cfg)?;
+/// assert_eq!(round.height(), b1.height);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Round<P: Phase> {
     block: BlockId,
@@ -77,24 +214,113 @@ pub struct Round<P: Phase> {
 
 impl<P: Phase> Round<P> {
     /// The block this round decides on.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// assert_eq!(Round::propose(&b1).block_id(), b1.id);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn block_id(&self) -> BlockId {
         self.block
     }
 
     /// View in which the block was proposed.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// assert_eq!(Round::propose(&b1).view(), View(1));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn view(&self) -> View {
         self.view
     }
 
     /// Height of the block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// assert_eq!(Round::propose(&b1).height(), 1);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn height(&self) -> u64 {
         self.height
     }
 
     /// Most recent certified block of the direct chain starting at the block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// // The tip is the most recent block the round has seen; right after proposal, that is b1.
+    /// assert_eq!(Round::propose(&b1).tip(), b1.id);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn tip(&self) -> BlockId {
         self.tip
@@ -146,6 +372,29 @@ fn check_certifies(
 
 impl Round<Prepare> {
     /// Starts tracking a proposed block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let round = Round::propose(&b1);
+    /// assert_eq!(round.block_id(), b1.id);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn propose(block: &Block) -> Self {
         Self {
@@ -162,6 +411,31 @@ impl Round<Prepare> {
     ///
     /// # Errors
     /// [`ConsensusError::QcMismatch`] or a QC validation error.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let cfg = Config::new(4)?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// // A certificate for a different block is rejected.
+    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+    /// assert!(Round::propose(&b1).certify(&cert(&b2), &cfg).is_err());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn certify(
         self,
         qc: &QuorumCert,
@@ -179,6 +453,31 @@ impl Round<PreCommit> {
     /// # Errors
     /// [`ConsensusError::NotDirectChain`], [`ConsensusError::QcMismatch`] or a
     /// QC validation error.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let cfg = Config::new(4)?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+    /// let pre = Round::propose(&b1).certify(&cert(&b1), &cfg)?;
+    /// assert!(pre.lock(&b2, &cert(&b2), &cfg).is_ok());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn lock(
         self,
         child: &Block,
@@ -196,6 +495,32 @@ impl Round<Commit> {
     /// # Errors
     /// [`ConsensusError::NotDirectChain`], [`ConsensusError::QcMismatch`] or a
     /// QC validation error.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::*;
+    ///
+    /// // A quorum certificate for `b` signed by replicas 0, 1 and 2 (a quorum when n = 4).
+    /// fn cert(b: &Block) -> QuorumCert {
+    ///     let mut signers = SignerSet::new();
+    ///     for i in 0..3u16 {
+    ///         signers.insert(ReplicaId(i)).unwrap();
+    ///     }
+    ///     QuorumCert { view: b.view, block: b.id, signers }
+    /// }
+    /// use tpt_algo_consensus::{Block, Round};
+    ///
+    /// let cfg = Config::new(4)?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+    /// let b3 = Block::new(&b2, View(3), ReplicaId(3), 12, cert(&b2))?;
+    /// let commit = Round::propose(&b1).certify(&cert(&b1), &cfg)?.lock(&b2, &cert(&b2), &cfg)?;
+    /// assert!(commit.decide(&b3, &cert(&b3), &cfg).is_ok());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn decide(
         self,
         grandchild: &Block,

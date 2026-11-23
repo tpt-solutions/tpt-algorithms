@@ -6,11 +6,28 @@ use core::fmt;
 use crate::error::ConsensusError;
 
 /// Largest replica group supported by [`SignerSet`] and therefore by [`Config`].
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::MAX_REPLICAS;
+///
+/// assert_eq!(MAX_REPLICAS, 256);
+/// ```
 pub const MAX_REPLICAS: u16 = 256;
 
 const WORDS: usize = (MAX_REPLICAS as usize) / 64;
 
 /// Identifier of a replica, in `0..n`.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::ReplicaId;
+///
+/// let leader = ReplicaId(2);
+/// assert_eq!(leader.0, 2);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReplicaId(pub u16);
@@ -23,6 +40,15 @@ impl fmt::Display for ReplicaId {
 
 /// A protocol view (round) number. View 0 is reserved for the genesis block;
 /// the first proposal happens in view 1.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::View;
+///
+/// assert_eq!(View::GENESIS, View(0));
+/// assert_eq!(View(4).next(), View(5));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct View(pub u64);
@@ -32,6 +58,14 @@ impl View {
     pub const GENESIS: View = View(0);
 
     /// The following view, saturating at `u64::MAX`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::View;
+    ///
+    /// assert_eq!(View(9).next(), View(10));
+    /// ```
     #[must_use]
     pub const fn next(self) -> View {
         View(self.0.saturating_add(1))
@@ -46,6 +80,17 @@ impl fmt::Display for View {
 
 /// Fixed-capacity bitset of replica ids (capacity [`MAX_REPLICAS`]), used as
 /// the signer set of a quorum certificate and for vote aggregation.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::{ReplicaId, SignerSet};
+///
+/// let mut s = SignerSet::new();
+/// assert!(s.insert(ReplicaId(1)).unwrap());
+/// assert!(s.contains(ReplicaId(1)));
+/// assert_eq!(s.len(), 1);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SignerSet {
@@ -54,6 +99,14 @@ pub struct SignerSet {
 
 impl SignerSet {
     /// The empty set.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::SignerSet;
+    ///
+    /// assert!(SignerSet::new().is_empty());
+    /// ```
     #[must_use]
     pub const fn new() -> Self {
         Self { words: [0; WORDS] }
@@ -67,6 +120,16 @@ impl SignerSet {
     ///
     /// # Errors
     /// [`ConsensusError::UnknownReplica`] if `id >= MAX_REPLICAS`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{ReplicaId, SignerSet};
+    ///
+    /// let mut s = SignerSet::new();
+    /// assert!(s.insert(ReplicaId(3)).unwrap()); // newly added
+    /// assert!(!s.insert(ReplicaId(3)).unwrap()); // already present
+    /// ```
     pub fn insert(&mut self, id: ReplicaId) -> Result<bool, ConsensusError> {
         let (w, bit) = Self::slot(id);
         let word = self
@@ -79,6 +142,17 @@ impl SignerSet {
     }
 
     /// Whether `id` is a member.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{ReplicaId, SignerSet};
+    ///
+    /// let mut s = SignerSet::new();
+    /// s.insert(ReplicaId(0)).unwrap();
+    /// assert!(s.contains(ReplicaId(0)));
+    /// assert!(!s.contains(ReplicaId(1)));
+    /// ```
     #[must_use]
     pub fn contains(&self, id: ReplicaId) -> bool {
         let (w, bit) = Self::slot(id);
@@ -86,6 +160,17 @@ impl SignerSet {
     }
 
     /// Number of members.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{ReplicaId, SignerSet};
+    ///
+    /// let mut s = SignerSet::new();
+    /// s.insert(ReplicaId(0)).unwrap();
+    /// s.insert(ReplicaId(5)).unwrap();
+    /// assert_eq!(s.len(), 2);
+    /// ```
     #[must_use]
     pub fn len(&self) -> u16 {
         let total: u32 = self.words.iter().map(|w| w.count_ones()).sum();
@@ -93,12 +178,32 @@ impl SignerSet {
     }
 
     /// Whether the set is empty.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::SignerSet;
+    ///
+    /// assert!(SignerSet::new().is_empty());
+    /// ```
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.words.iter().all(|w| *w == 0)
     }
 
     /// Iterates members in ascending order.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{ReplicaId, SignerSet};
+    ///
+    /// let mut s = SignerSet::new();
+    /// s.insert(ReplicaId(2)).unwrap();
+    /// s.insert(ReplicaId(0)).unwrap();
+    /// let ids: Vec<u16> = s.iter().map(|r| r.0).collect();
+    /// assert_eq!(ids, vec![0, 2]); // ascending order
+    /// ```
     pub fn iter(&self) -> impl Iterator<Item = ReplicaId> + '_ {
         (0..MAX_REPLICAS)
             .map(ReplicaId)
@@ -106,6 +211,18 @@ impl SignerSet {
     }
 
     /// Set union.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{ReplicaId, SignerSet};
+    ///
+    /// let mut a = SignerSet::new();
+    /// a.insert(ReplicaId(0)).unwrap();
+    /// let mut b = SignerSet::new();
+    /// b.insert(ReplicaId(1)).unwrap();
+    /// assert_eq!(a.union(&b).len(), 2);
+    /// ```
     #[must_use]
     pub fn union(&self, other: &SignerSet) -> SignerSet {
         let mut words = self.words;
@@ -116,6 +233,18 @@ impl SignerSet {
     }
 
     /// Whether every member is `< n`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{ReplicaId, SignerSet};
+    ///
+    /// let mut s = SignerSet::new();
+    /// s.insert(ReplicaId(0)).unwrap();
+    /// s.insert(ReplicaId(2)).unwrap();
+    /// assert!(s.all_below(3));
+    /// assert!(!s.all_below(2));
+    /// ```
     #[must_use]
     pub fn all_below(&self, n: u16) -> bool {
         self.iter().all(|id| id.0 < n)
@@ -127,6 +256,15 @@ impl SignerSet {
 /// `f = (n - 1) / 3` faults are tolerated and the quorum is `n - f`, which
 /// equals `2f + 1` when `n = 3f + 1` and keeps any two quorums intersecting in
 /// at least `f + 1` replicas for other `n`. All arithmetic is integer.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::Config;
+///
+/// let cfg = Config::new(4).unwrap();
+/// assert_eq!((cfg.n(), cfg.f(), cfg.quorum()), (4, 1, 3));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Config {
     n: u16,
@@ -149,6 +287,16 @@ impl Config {
     /// # Errors
     /// [`ConsensusError::TooFewReplicas`] if `n < 4`,
     /// [`ConsensusError::TooManyReplicas`] if `n > MAX_REPLICAS`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{Config, ConsensusError};
+    ///
+    /// assert!(Config::new(4).is_ok());
+    /// // Fewer than four replicas cannot tolerate even one fault.
+    /// assert!(matches!(Config::new(3), Err(ConsensusError::TooFewReplicas { .. })));
+    /// ```
     pub fn new(n: u16) -> Result<Self, ConsensusError> {
         if n < 4 {
             return Err(ConsensusError::TooFewReplicas { n });
@@ -177,6 +325,19 @@ impl Config {
     /// # Errors
     /// [`ConsensusError::InvalidTimeout`] if `base_timeout == 0` or
     /// `max_backoff_shift > MAX_BACKOFF_SHIFT_LIMIT`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, ConsensusError};
+    ///
+    /// let cfg = Config::new(4)?.with_timeouts(50, 3)?;
+    /// assert_eq!(cfg.base_timeout(), 50);
+    /// assert!(matches!(Config::new(4)?.with_timeouts(0, 3), Err(ConsensusError::InvalidTimeout)));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_timeouts(
         self,
         base_timeout: u64,
@@ -193,42 +354,102 @@ impl Config {
     }
 
     /// Number of replicas.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// assert_eq!(Config::new(7).unwrap().n(), 7);
+    /// ```
     #[must_use]
     pub const fn n(&self) -> u16 {
         self.n
     }
 
     /// Number of tolerated Byzantine replicas.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// // n = 3f + 1, so n = 7 tolerates f = 2 faults.
+    /// assert_eq!(Config::new(7).unwrap().f(), 2);
+    /// ```
     #[must_use]
     pub const fn f(&self) -> u16 {
         self.f
     }
 
     /// Quorum size (`n - f`).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// assert_eq!(Config::new(7).unwrap().quorum(), 5); // 2f + 1
+    /// ```
     #[must_use]
     pub const fn quorum(&self) -> u16 {
         self.quorum
     }
 
     /// Base view timeout in ticks.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// assert_eq!(Config::new(4).unwrap().base_timeout(), Config::DEFAULT_BASE_TIMEOUT);
+    /// ```
     #[must_use]
     pub const fn base_timeout(&self) -> u64 {
         self.base_timeout
     }
 
     /// Cap on the back-off exponent.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// assert_eq!(Config::new(4).unwrap().max_backoff_shift(), Config::DEFAULT_MAX_BACKOFF_SHIFT);
+    /// ```
     #[must_use]
     pub const fn max_backoff_shift(&self) -> u32 {
         self.max_backoff_shift
     }
 
     /// Whether `id` is a member of the group.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{Config, ReplicaId};
+    ///
+    /// let cfg = Config::new(4).unwrap();
+    /// assert!(cfg.contains(ReplicaId(3)));
+    /// assert!(!cfg.contains(ReplicaId(4)));
+    /// ```
     #[must_use]
     pub const fn contains(&self, id: ReplicaId) -> bool {
         id.0 < self.n
     }
 
     /// Round-robin leader of `view`: `view mod n`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::{Config, ReplicaId, View};
+    ///
+    /// let cfg = Config::new(4).unwrap();
+    /// assert_eq!(cfg.leader(View(5)), ReplicaId(1)); // 5 mod 4
+    /// ```
     #[must_use]
     pub fn leader(&self, view: View) -> ReplicaId {
         let idx = view.0 % u64::from(self.n);
@@ -236,6 +457,17 @@ impl Config {
     }
 
     /// View timeout after `consecutive_timeouts` views in a row ended by timeout.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::Config;
+    ///
+    /// let cfg = Config::new(4).unwrap();
+    /// // Each consecutive timeout doubles the wait, up to the backoff limit.
+    /// assert_eq!(cfg.timeout_for(0), cfg.base_timeout());
+    /// assert_eq!(cfg.timeout_for(1), 2 * cfg.base_timeout());
+    /// ```
     #[must_use]
     pub fn timeout_for(&self, consecutive_timeouts: u32) -> u64 {
         let shift = consecutive_timeouts.min(self.max_backoff_shift);

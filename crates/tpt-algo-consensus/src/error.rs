@@ -10,6 +10,21 @@
 /// should never happen while at most `f` replicas are faulty; observing it
 /// indicates a bug or an assumption violation (for example more than `f`
 /// faulty replicas, or forged quorum certificates).
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::{Config, ConsensusError};
+///
+/// // Validation errors carry the offending values, so callers can report them.
+/// match Config::new(2) {
+///     Err(ConsensusError::TooFewReplicas { .. }) => {}
+///     other => panic!("unexpected: {other:?}"),
+/// }
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
 pub enum ConsensusError {
     /// Fewer than four replicas were requested (`n >= 3f + 1` with `f >= 1`).

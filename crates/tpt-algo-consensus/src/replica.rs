@@ -56,6 +56,18 @@ struct Orphan {
 /// * **Pacemaker**: round-robin leaders, exponential back-off timeouts,
 ///   `NewView` broadcast on timeout, and a jump to the `(f + 1)`-th highest
 ///   reported view so honest replicas re-synchronise.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+///
+/// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+/// assert_eq!(r.id(), ReplicaId(0));
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone)]
 pub struct Replica {
     id: ReplicaId,
@@ -87,6 +99,21 @@ impl Replica {
     ///
     /// # Errors
     /// [`ConsensusError::UnknownReplica`] if `id` is not in `0..n`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, ConsensusError, Replica, ReplicaId};
+    ///
+    /// // Replica ids must be members of the configured set.
+    /// assert!(matches!(
+    ///     Replica::new(ReplicaId(9), Config::new(4)?),
+    ///     Err(ConsensusError::UnknownReplica { .. })
+    /// ));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(id: ReplicaId, config: Config) -> Result<Self, ConsensusError> {
         if !config.contains(id) {
             return Err(ConsensusError::UnknownReplica { id: id.0 });
@@ -121,54 +148,162 @@ impl Replica {
     }
 
     /// This replica's id.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(2), Config::new(4)?)?;
+    /// assert_eq!(r.id(), ReplicaId(2));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn id(&self) -> ReplicaId {
         self.id
     }
 
     /// Group configuration.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert_eq!(r.config().n(), 4);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn config(&self) -> &Config {
         &self.config
     }
 
     /// Current view.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId, View};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert_eq!(r.current_view(), View::GENESIS);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn current_view(&self) -> View {
         self.current_view
     }
 
     /// Highest known quorum certificate.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert!(r.high_qc().is_genesis()); // nothing certified yet
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn high_qc(&self) -> &QuorumCert {
         &self.high_qc
     }
 
     /// Certificate of the locked block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert!(r.locked_qc().is_genesis());
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn locked_qc(&self) -> &QuorumCert {
         &self.locked_qc
     }
 
     /// Highest view this replica voted in.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId, View};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert_eq!(r.last_voted_view(), View::GENESIS); // has not voted
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn last_voted_view(&self) -> View {
         self.last_voted_view
     }
 
     /// Committed blocks in order; entry `i` has height `i + 1`. Final.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert!(r.committed().is_empty());
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn committed(&self) -> &[Block] {
         &self.committed
     }
 
     /// Looks up a stored block.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{BlockId, Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert!(r.block(BlockId(123)).is_none()); // unknown block
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn block(&self, id: BlockId) -> Option<&Block> {
         self.blocks.get(&id)
     }
 
     /// Logical time at which the current view times out, once started.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// assert_eq!(r.deadline(), None); // no timer until started
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn deadline(&self) -> Option<u64> {
         if self.started {
@@ -180,6 +315,18 @@ impl Replica {
 
     /// Queues a command to be proposed the next time this replica leads.
     /// Without queued commands the leader proposes payload `0`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let mut r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// r.submit(42); // queued as the payload of the next proposal
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn submit(&mut self, command: u64) {
         self.mempool.push_back(command);
     }
@@ -188,6 +335,19 @@ impl Replica {
     ///
     /// # Errors
     /// Propagates internal errors (none are expected for a fresh replica).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let mut r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// let _out = r.start(0)?; // arms the view timer
+    /// assert!(r.deadline().is_some());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn start(&mut self, now: u64) -> Result<Vec<Outgoing>, ConsensusError> {
         let mut out = Vec::new();
         if self.started {
@@ -210,6 +370,20 @@ impl Replica {
     /// Any validation error from [`ConsensusError`];
     /// [`ConsensusError::ConflictingCommit`] signals a detected safety
     /// violation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Message, Replica, ReplicaId, BlockId};
+    ///
+    /// let mut r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// r.start(0)?;
+    /// // A message from outside the configured set is rejected.
+    /// assert!(r.handle(1, ReplicaId(9), &Message::FetchBlock(BlockId(1))).is_err());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn handle(
         &mut self,
         now: u64,
@@ -236,6 +410,20 @@ impl Replica {
     ///
     /// # Errors
     /// Propagates internal errors (for example a detected conflicting commit).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{Config, Replica, ReplicaId};
+    ///
+    /// let mut r = Replica::new(ReplicaId(0), Config::new(4)?)?;
+    /// r.start(0)?;
+    /// let deadline = r.deadline().unwrap();
+    /// let _out = r.tick(deadline)?; // the view timer fired: the replica moves to a new view
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn tick(&mut self, now: u64) -> Result<Vec<Outgoing>, ConsensusError> {
         let mut out = Vec::new();
         if !self.started {

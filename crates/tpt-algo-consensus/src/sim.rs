@@ -64,6 +64,16 @@ impl SplitMix64 {
 }
 
 /// Fault injected into one replica.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::sim::FaultKind;
+///
+/// // A crashed replica stops at tick 100; an equivocating one sends conflicting votes.
+/// let crash = FaultKind::Crash { at_tick: 100 };
+/// assert_ne!(crash, FaultKind::Equivocate);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FaultKind {
     /// Stops at `at_tick` (0 = never starts).
@@ -76,6 +86,15 @@ pub enum FaultKind {
 }
 
 /// Fault assignment.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::{sim::{FaultKind, FaultSpec}, ReplicaId};
+///
+/// let f = FaultSpec { replica: ReplicaId(3), kind: FaultKind::Equivocate };
+/// assert_eq!(f.replica, ReplicaId(3));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FaultSpec {
     /// Faulty replica.
@@ -85,6 +104,17 @@ pub struct FaultSpec {
 }
 
 /// Simulation parameters. All quantities are integers (ticks, per-mille).
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::sim::SimConfig;
+///
+/// let cfg = SimConfig::new(4, 7);
+/// assert_eq!(cfg.n, 4);
+/// assert_eq!(cfg.seed, 7);
+/// assert!(cfg.faults.is_empty()); // honest run by default
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SimConfig {
     /// Number of replicas.
@@ -109,6 +139,15 @@ pub struct SimConfig {
 
 impl SimConfig {
     /// A synchronous, fault-free network with unit delays.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::sim::SimConfig;
+    ///
+    /// let cfg = SimConfig::new(7, 1);
+    /// assert_eq!(cfg.n, 7);
+    /// ```
     #[must_use]
     pub fn new(n: u16, seed: u64) -> Self {
         Self {
@@ -126,6 +165,21 @@ impl SimConfig {
 }
 
 /// Counters collected during a run.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::sim::Simulator;
+/// use tpt_algo_consensus::sim::SimConfig;
+///
+/// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+/// sim.run(200);
+/// // A clean honest run never detects a safety violation.
+/// assert_eq!(sim.stats().safety_violations, 0);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct SimStats {
     /// Messages delivered to live replicas.
@@ -143,6 +197,21 @@ pub struct SimStats {
 }
 
 /// Outcome of a run.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+///
+/// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+/// sim.run(200);
+/// let report = sim.report();
+/// assert_eq!(report.honest_logs.len(), 4);
+/// assert_eq!(report.now, 201);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SimReport {
     /// Committed log of every replica without an injected fault.
@@ -163,6 +232,19 @@ struct InFlight {
 }
 
 /// Deterministic simulator of a replica group.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use tpt_algo_consensus::sim::{check_prefix_consistency, SimConfig, Simulator};
+///
+/// let mut sim = Simulator::new(SimConfig::new(4, 3))?;
+/// sim.run(300);
+/// assert!(check_prefix_consistency(&sim.report().honest_logs).is_ok());
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone)]
 pub struct Simulator {
     config: SimConfig,
@@ -184,6 +266,16 @@ impl Simulator {
     /// Configuration errors, [`ConsensusError::UnknownReplica`] for a fault on
     /// a non-member, or [`ConsensusError::InvalidParameter`] for zero delays
     /// or a drop rate above 1000 per-mille.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut cfg = SimConfig::new(4, 1);
+    /// cfg.n = 3; // below the four-replica minimum
+    /// assert!(Simulator::new(cfg).is_err());
+    /// ```
     pub fn new(config: SimConfig) -> Result<Self, ConsensusError> {
         let consensus =
             Config::new(config.n)?.with_timeouts(config.base_timeout, config.max_backoff_shift)?;
@@ -236,18 +328,57 @@ impl Simulator {
     }
 
     /// Consensus configuration in use.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// assert_eq!(sim.consensus_config().n(), 4);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn consensus_config(&self) -> &Config {
         &self.consensus
     }
 
     /// Current tick (the next tick [`Simulator::step`] will execute).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// assert_eq!(sim.now(), 1); // the first tick is 1
+    /// sim.step();
+    /// assert_eq!(sim.now(), 2);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn now(&self) -> u64 {
         self.now
     }
 
     /// Counters so far.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// sim.run(50);
+    /// assert!(sim.stats().delivered > 0);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub const fn stats(&self) -> &SimStats {
         &self.stats
@@ -255,18 +386,60 @@ impl Simulator {
 
     /// Up to 16 rejections of honest-sender messages `(from, to, error)`, for
     /// diagnostics. Expected to be empty.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// sim.run(100);
+    /// // An honest run rejects no honest message.
+    /// assert!(sim.honest_rejections().is_empty());
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn honest_rejections(&self) -> &[(ReplicaId, ReplicaId, ConsensusError)] {
         &self.honest_rejections
     }
 
     /// A replica by id.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{sim::{SimConfig, Simulator}, ReplicaId};
+    ///
+    /// let sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// assert!(sim.replica(ReplicaId(2)).is_some());
+    /// assert!(sim.replica(ReplicaId(9)).is_none());
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn replica(&self, id: ReplicaId) -> Option<&Replica> {
         self.replicas.get(usize::from(id.0))
     }
 
     /// Whether `id` has no injected fault.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::{sim::{FaultKind, FaultSpec, SimConfig, Simulator}, ReplicaId};
+    ///
+    /// let mut cfg = SimConfig::new(4, 1);
+    /// cfg.faults = vec![FaultSpec { replica: ReplicaId(3), kind: FaultKind::Crash { at_tick: 0 } }];
+    /// let sim = Simulator::new(cfg)?;
+    /// assert!(!sim.is_honest(ReplicaId(3)));
+    /// assert!(sim.is_honest(ReplicaId(0)));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn is_honest(&self, id: ReplicaId) -> bool {
         matches!(self.faults.get(usize::from(id.0)), Some(None))
@@ -288,6 +461,19 @@ impl Simulator {
     }
 
     /// Executes one tick: delivers due messages, then ticks every live replica.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// sim.step(); // one tick: deliver due messages, then fire due timers
+    /// assert_eq!(sim.now(), 2);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn step(&mut self) {
         let now = self.now;
         let due: Vec<(u64, u64)> = self
@@ -315,6 +501,19 @@ impl Simulator {
     }
 
     /// Executes `ticks` ticks.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// sim.run(120);
+    /// assert_eq!(sim.now(), 121);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn run(&mut self, ticks: u64) {
         for _ in 0..ticks {
             self.step();
@@ -322,6 +521,20 @@ impl Simulator {
     }
 
     /// Snapshot of the committed logs and counters.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use tpt_algo_consensus::sim::{SimConfig, Simulator};
+    ///
+    /// let mut sim = Simulator::new(SimConfig::new(4, 1))?;
+    /// sim.run(100);
+    /// let report = sim.report();
+    /// assert!(report.max_honest_view.0 > 0); // views advanced
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn report(&self) -> SimReport {
         let honest: Vec<&Replica> = self
@@ -493,6 +706,15 @@ impl Simulator {
 ///
 /// # Errors
 /// [`ConsensusError::ConflictingCommit`] with the first offending height.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_consensus::{sim::check_prefix_consistency, ReplicaId};
+///
+/// // Empty logs are trivially consistent.
+/// assert!(check_prefix_consistency(&[(ReplicaId(0), Vec::new())]).is_ok());
+/// ```
 pub fn check_prefix_consistency(logs: &[(ReplicaId, Vec<Block>)]) -> Result<(), ConsensusError> {
     let mut canonical: Vec<Block> = Vec::new();
     for (_, log) in logs {
