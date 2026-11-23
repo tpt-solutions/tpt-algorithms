@@ -6,8 +6,8 @@ rust-version.workspace = true
 license.workspace = true
 description = "Velocity-obstacle collision avoidance and grid path planning for multi-agent systems"
 readme = "README.md"
-keywords = ["algorithms", "no-std", "swarm"]
-categories = ["algorithms", "science", "no-std"]
+keywords = ["collision-avoidance", "velocity-obstacle", "multi-agent", "path-planning", "no-std"]
+categories = ["algorithms", "science::robotics", "simulation", "no-std"]
 
 [features]
 default = ["std"]
