@@ -6,8 +6,8 @@ rust-version.workspace = true
 license.workspace = true
 description = "Vehicle routing (CVRP) construction and local search"
 readme = "README.md"
-keywords = ["algorithms", "no-std", "routing"]
-categories = ["algorithms", "science", "no-std"]
+keywords = ["vehicle-routing", "cvrp", "savings", "local-search", "no-std"]
+categories = ["algorithms", "mathematics", "science", "no-std"]
 
 [features]
 default = ["std"]
