@@ -8,6 +8,19 @@ While the version is `0.x`, minor releases may contain breaking changes.
 
 ## [Unreleased]
 
+## [0.0.0](https://github.com/tpt-solutions/tpt-algorithms/releases/tag/tpt-algo-soc-v0.0.0) - 2026-11-23
+
+### Added
+
+- *(soc)* add state and covariance contracts and doctests
+- *(math-core)* add shared proptest strategies
+
+### Other
+
+- *(soc)* crates.io metadata, README rewrite and CHANGELOG
+- pin LF line endings and add docs.rs metadata for public crates
+- Add tpt-algo-soc crate
+
 ### Added
 
 - First-order Thevenin (RC equivalent-circuit) cell model: `Model` built from
