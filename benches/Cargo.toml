@@ -1,6 +1,9 @@
 [package]
 name = "tpt-algo-benches"
 description = "Cross-crate Criterion benchmark suite (not published)."
+readme = "README.md"
+keywords = ["benchmark", "criterion", "performance"]
+categories = ["development-tools"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
