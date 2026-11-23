@@ -1,0 +1,85 @@
+name: Bindings (Python and WebAssembly)
+
+# The binding crates are excluded from the root workspace, so the main CI never
+# builds them. This workflow builds and tests each one on its own.
+on:
+  pull_request:
+    paths:
+      - "crates/tpt-algo-py/**"
+      - "crates/tpt-algo-wasm/**"
+      - "internal/tpt-algo-bindings-core/**"
+      - "crates/tpt-algo-fraud/**"
+      - "crates/tpt-algo-soc/**"
+      - ".github/workflows/bindings.yml"
+  push:
+    branches: [master]
+    paths:
+      - "crates/tpt-algo-py/**"
+      - "crates/tpt-algo-wasm/**"
+      - "internal/tpt-algo-bindings-core/**"
+      - "crates/tpt-algo-fraud/**"
+      - "crates/tpt-algo-soc/**"
+      - ".github/workflows/bindings.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  wasm:
+    name: wasm (wasm-bindgen, Node)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: crates/tpt-algo-wasm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/tpt-algo-wasm
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack,cargo-deny
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: wasm-pack test --node
+      - name: Licence policy
+        run: cargo deny --manifest-path Cargo.toml --config ../../deny.toml check licenses
+
+  python:
+    name: python (pyo3, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        working-directory: crates/tpt-algo-py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/tpt-algo-py
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+      - name: Licence policy
+        run: cargo deny --manifest-path Cargo.toml --config ../../deny.toml check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install --upgrade pip maturin
+      - run: maturin build --release --out dist
+      - run: python -m pip install --force-reinstall dist/*.whl
+        shell: bash
+      - run: python -m unittest discover -s tests -v

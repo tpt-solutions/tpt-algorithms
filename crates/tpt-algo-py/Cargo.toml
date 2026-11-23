@@ -1,0 +1,32 @@
+[package]
+name = "tpt-algo-py"
+description = "Python bindings (pyo3) for tpt-algo-fraud and tpt-algo-soc. Built with maturin; not published to crates.io."
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.98"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+name = "tpt_algo"
+crate-type = ["cdylib"]
+
+[features]
+# Enabled by maturin when building the wheel. Without it, `cargo build` links
+# against libpython, which is what a local check on Windows needs.
+extension-module = ["pyo3/extension-module"]
+
+[dependencies]
+pyo3 = { version = "0.30", features = ["abi3-py310"] }
+tpt-algo-bindings-core = { path = "../../internal/tpt-algo-bindings-core" }
+
+# This crate is built on its own (maturin, CI). It is excluded from the root
+# workspace so `cargo test --workspace` never links libpython.
+[workspace]
+
+# pyo3-build-config needs target-lexicon only at build time. Upstream is
+# Apache-2.0 WITH LLVM-exception, which spec section 5.1 bans, so it is replaced
+# by the MIT-only drop-in tpt-solutions/target-lexicon-mit (same crate name and
+# version). Pinned to a commit so the build cannot change underneath us.
+[patch.crates-io]
+target-lexicon = { git = "https://github.com/tpt-solutions/target-lexicon-mit", rev = "297f442a451c1406252bb428702eecc5be596473" }

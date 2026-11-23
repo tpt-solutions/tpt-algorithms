@@ -4,6 +4,7 @@ members = [
     "internal/tpt-algo-math-core",
     "internal/tpt-algo-geometry",
     "internal/tpt-algo-synth-data",
+    "internal/tpt-algo-bindings-core",
     "benches",
     "crates/tpt-algo-soc",
     "crates/tpt-algo-fraud",
@@ -12,6 +13,8 @@ members = [
     "crates/tpt-algo-swarm",
     "crates/tpt-algo-consensus",
 ]
+# Binding crates are standalone builds (maturin / wasm-pack), see docs/bindings.md.
+exclude = ["crates/tpt-algo-py", "crates/tpt-algo-wasm"]
 
 [workspace.package]
 version = "0.0.0"

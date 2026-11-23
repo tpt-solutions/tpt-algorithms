@@ -1,0 +1,15 @@
+[package]
+name = "tpt-algo-bindings-core"
+description = "Internal binding-independent wrappers around tpt-algo-fraud and tpt-algo-soc (no FFI)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+tpt-algo-fraud = { path = "../../crates/tpt-algo-fraud" }
+tpt-algo-soc = { path = "../../crates/tpt-algo-soc" }
+
+[lints]
+workspace = true

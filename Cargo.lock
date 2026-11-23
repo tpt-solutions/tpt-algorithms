@@ -665,6 +665,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tpt-algo-bindings-core"
+version = "0.0.0"
+dependencies = [
+ "tpt-algo-fraud",
+ "tpt-algo-soc",
+]
+
+[[package]]
 name = "tpt-algo-consensus"
 version = "0.0.0"
 dependencies = [

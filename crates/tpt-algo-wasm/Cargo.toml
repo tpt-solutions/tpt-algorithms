@@ -1,0 +1,22 @@
+[package]
+name = "tpt-algo-wasm"
+description = "WebAssembly bindings (wasm-bindgen) for tpt-algo-fraud and tpt-algo-soc. Built with wasm-pack; not published to crates.io."
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.98"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+tpt-algo-bindings-core = { path = "../../internal/tpt-algo-bindings-core" }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+# Built on its own with wasm-pack (see docs/bindings.md). Excluded from the root
+# workspace so the native workspace build never targets wasm32.
+[workspace]
