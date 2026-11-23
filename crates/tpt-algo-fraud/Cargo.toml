@@ -1,0 +1,28 @@
+[package]
+name = "tpt-algo-fraud"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Anomaly scoring with seeded Isolation Forests"
+readme = "README.md"
+keywords = ["algorithms", "no-std", "fraud"]
+categories = ["algorithms", "science", "no-std"]
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+serde = ["dep:serde"]
+
+[dependencies]
+libm.workspace = true
+serde = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tpt-algo-synth-data.workspace = true
+
+[lints]
+workspace = true
