@@ -1,0 +1,28 @@
+[package]
+name = "tpt-algo-routing"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Vehicle routing (CVRP) construction and local search"
+readme = "README.md"
+keywords = ["algorithms", "no-std", "routing"]
+categories = ["algorithms", "science", "no-std"]
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+serde = ["dep:serde"]
+
+[dependencies]
+libm.workspace = true
+serde = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tpt-algo-synth-data.workspace = true
+
+[lints]
+workspace = true
