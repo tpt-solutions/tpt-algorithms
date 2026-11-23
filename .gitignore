@@ -1,5 +1,5 @@
 # Rust
-/target/
+target/
 **/*.rs.bk
 Cargo.lock.bak
 
@@ -19,3 +19,7 @@ Thumbs.db
 
 # Env
 .env
+
+# Python (tpt-algo-py tests)
+__pycache__/
+*.pyc
