@@ -6,8 +6,8 @@ rust-version.workspace = true
 license.workspace = true
 description = "Limit order book simulation with price-time priority matching, VWAP and spread"
 readme = "README.md"
-keywords = ["algorithms", "no-std", "orderbook"]
-categories = ["algorithms", "science", "no-std"]
+keywords = ["order-book", "limit-order", "matching-engine", "vwap", "no-std"]
+categories = ["algorithms", "finance", "simulation", "no-std"]
 
 [features]
 default = ["std"]
