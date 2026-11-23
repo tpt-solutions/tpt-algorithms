@@ -1,0 +1,26 @@
+# release-plz configuration. See docs/release.md.
+
+[workspace]
+# One release PR for all changed crates.
+pr_name = "chore: release"
+changelog_update = true
+git_release_enable = false
+semver_check = true
+publish_timeout = "10m"
+
+# Internal crates are never released.
+[[package]]
+name = "tpt-algo-math-core"
+release = false
+
+[[package]]
+name = "tpt-algo-geometry"
+release = false
+
+[[package]]
+name = "tpt-algo-synth-data"
+release = false
+
+[[package]]
+name = "tpt-algo-benches"
+release = false

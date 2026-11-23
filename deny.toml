@@ -1,0 +1,52 @@
+# cargo-deny configuration (schema version 2).
+# Enforces the dependency & license policy in spec.txt section 5.
+#
+# Dual-licensed "MIT OR Apache-2.0" crates pass because the MIT branch is allowed.
+# Apache-2.0-only crates fail because Apache-2.0 is intentionally NOT in `allow`.
+
+[graph]
+all-features = true
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+[advisories]
+version = 2
+yanked = "deny"
+unmaintained = "workspace"
+ignore = []
+
+[licenses]
+version = 2
+confidence-threshold = 0.93
+unused-allowed-license = "deny"
+allow = [
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-DFS-2016",
+    "Unicode-3.0",
+]
+# Anything not listed above (Apache-2.0-only, GPL/AGPL/LGPL/SSPL/EUPL, CC-BY-NC,
+# MPL-2.0, unlicensed) is rejected. These are the explicit bans from spec section 5.1:
+exceptions = []
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+highlight = "all"
+deny = [
+    # Crates that pull in copyleft or non-commercial licensed code are banned outright.
+    # Add entries here if a transitive crate must be excluded by name.
+]
+skip = []
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

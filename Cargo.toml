@@ -1,0 +1,45 @@
+[workspace]
+resolver = "2"
+members = [
+    "internal/tpt-algo-math-core",
+    "internal/tpt-algo-geometry",
+    "internal/tpt-algo-synth-data",
+    "crates/tpt-algo-soc",
+    "crates/tpt-algo-fraud",
+    "crates/tpt-algo-orderbook",
+    "crates/tpt-algo-routing",
+    "crates/tpt-algo-swarm",
+    "crates/tpt-algo-consensus",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.98"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# Internal (unpublished) crates
+tpt-algo-math-core = { path = "internal/tpt-algo-math-core" }
+tpt-algo-geometry = { path = "internal/tpt-algo-geometry" }
+tpt-algo-synth-data = { path = "internal/tpt-algo-synth-data" }
+
+# Third-party (all MIT OR Apache-2.0 or MIT-compatible; see deny.toml)
+libm = { version = "0.2", default-features = false }
+proptest = "1"
+serde = { version = "1", default-features = false, features = ["derive"] }
+thiserror = { version = "2", default-features = false }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(docsrs)'] }
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+[profile.release]
+debug = false
+lto = "thin"
