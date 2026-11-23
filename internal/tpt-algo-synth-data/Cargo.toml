@@ -1,6 +1,9 @@
 [package]
 name = "tpt-algo-synth-data"
 description = "Internal deterministic synthetic data generators (seeded, reproducible)."
+readme = "README.md"
+keywords = ["synthetic-data", "test-data", "seeded", "simulation"]
+categories = ["simulation", "science"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
