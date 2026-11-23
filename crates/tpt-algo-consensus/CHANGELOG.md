@@ -8,6 +8,20 @@ While the version is `0.x`, minor releases may contain breaking changes.
 
 ## [Unreleased]
 
+## [0.0.1](https://github.com/tpt-solutions/tpt-algorithms/compare/tpt-algo-consensus-v0.0.0...tpt-algo-consensus-v0.0.1) - 2026-11-23
+
+### Added
+
+- *(consensus)* implement chained BFT state machine and simulator
+
+### Other
+
+- release
+- *(consensus)* crates.io metadata, README rewrite and CHANGELOG
+- *(consensus)* add runnable doctests for the public API
+- pin LF line endings and add docs.rs metadata for public crates
+- Add tpt-algo-consensus crate skeleton
+
 ## [0.0.0](https://github.com/tpt-solutions/tpt-algorithms/releases/tag/tpt-algo-consensus-v0.0.0) - 2026-11-23
 
 ### Added

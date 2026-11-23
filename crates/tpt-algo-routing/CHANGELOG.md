@@ -8,6 +8,12 @@ While the version is `0.x`, minor releases may contain breaking changes.
 
 ## [Unreleased]
 
+## [0.0.1](https://github.com/tpt-solutions/tpt-algorithms/compare/tpt-algo-routing-v0.0.0...tpt-algo-routing-v0.0.1) - 2026-11-23
+
+### Other
+
+- release
+
 ## [0.0.0](https://github.com/tpt-solutions/tpt-algorithms/releases/tag/tpt-algo-routing-v0.0.0) - 2026-11-23
 
 ### Added

@@ -657,7 +657,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-benches"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "criterion",
  "tpt-algo-math-core",
@@ -666,7 +666,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-bindings-core"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "tpt-algo-fraud",
  "tpt-algo-soc",
@@ -674,7 +674,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-consensus"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "proptest",
  "serde",
@@ -684,7 +684,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-fraud"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "proptest",
@@ -695,7 +695,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-geometry"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "proptest",
@@ -705,7 +705,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-math-core"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "proptest",
@@ -715,7 +715,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-orderbook"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "proptest",
  "serde",
@@ -725,7 +725,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-routing"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "proptest",
@@ -736,7 +736,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-soc"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "proptest",
@@ -748,7 +748,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-swarm"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "proptest",
@@ -759,7 +759,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-synth-data"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "libm",
  "serde",
