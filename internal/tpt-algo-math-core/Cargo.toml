@@ -1,6 +1,9 @@
 [package]
 name = "tpt-algo-math-core"
 description = "Internal shared numerics: stats, tolerances, fixed-point, deterministic RNG."
+readme = "README.md"
+keywords = ["numerics", "fixed-point", "statistics", "rng"]
+categories = ["algorithms", "mathematics"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
