@@ -13,6 +13,21 @@ struct Resting {
 }
 
 /// Cumulative quantity accounting; see the crate docs for the identity.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+/// # fn main() -> Result<(), OrderBookError> {
+/// let mut book = OrderBook::new();
+/// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+/// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+/// let s = book.stats();
+/// // Every accepted unit is resting, traded (on both sides), cancelled or expired.
+/// assert_eq!(s.accepted, book.resting_quantity() + 2 * s.traded + s.cancelled + s.expired);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Stats {
     /// Total quantity accepted (limit, market, executed-order and size increases).
@@ -26,6 +41,20 @@ pub struct Stats {
 }
 
 /// Error from [`OrderBook::replay`]: which event failed and why.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_orderbook::{Event, OrderBook, Price, Side};
+///
+/// let mut book = OrderBook::new();
+/// let events = [
+///     Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 },
+///     Event::Cancel { id: 42 }, // never added
+/// ];
+/// let err = book.replay(events).unwrap_err();
+/// assert_eq!(err.index, 1);
+/// ```
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 #[error("event {index} failed: {source}")]
 pub struct ReplayError {
@@ -36,6 +65,20 @@ pub struct ReplayError {
 }
 
 /// A limit order book with price-time priority matching.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+/// # fn main() -> Result<(), OrderBookError> {
+/// let mut book = OrderBook::new();
+/// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+/// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+/// assert_eq!(book.best_bid(), Some(Price(99)));
+/// assert_eq!(book.best_ask(), Some(Price(101)));
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Default)]
 pub struct OrderBook {
     bids: BTreeMap<Price, VecDeque<Resting>>,
@@ -48,36 +91,112 @@ pub struct OrderBook {
 
 impl OrderBook {
     /// Creates an empty book.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::OrderBook;
+    ///
+    /// let book = OrderBook::new();
+    /// assert_eq!(book.order_count(), 0);
+    /// assert!(book.best_bid().is_none());
+    /// ```
     #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Highest resting bid price.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.best_bid(), Some(Price(99)));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn best_bid(&self) -> Option<Price> {
         self.bids.keys().next_back().copied()
     }
 
     /// Lowest resting ask price.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.best_ask(), Some(Price(101)));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn best_ask(&self) -> Option<Price> {
         self.asks.keys().next().copied()
     }
 
     /// Spread `ask - bid` in ticks; `None` if a side is empty or on overflow.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.spread(), Some(2));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn spread(&self) -> Option<i64> {
         self.best_ask()?.0.checked_sub(self.best_bid()?.0)
     }
 
     /// Mid price in ticks; `None` if a side is empty.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.mid(), Some(100.0));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn mid(&self) -> Option<f64> {
         Some((self.best_bid()?.0 as f64 + self.best_ask()?.0 as f64) / 2.0)
     }
 
     /// Total resting quantity at a price level (zero if none).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.level_qty(Side::Bid, Price(99)), 10);
+    /// assert_eq!(book.level_qty(Side::Bid, Price(98)), 0); // empty level
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn level_qty(&self, side: Side, price: Price) -> u128 {
         self.side_map(side)
@@ -86,6 +205,19 @@ impl OrderBook {
     }
 
     /// Total resting quantity in the whole book.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.resting_quantity(), 15);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn resting_quantity(&self) -> u128 {
         self.bids
@@ -97,12 +229,39 @@ impl OrderBook {
     }
 
     /// Number of resting orders.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.order_count(), 2);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn order_count(&self) -> usize {
         self.index.len()
     }
 
     /// Side, price and remaining quantity of a resting order.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.order(1), Some((Side::Bid, Price(99), 10)));
+    /// assert_eq!(book.order(7), None);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn order(&self, id: u64) -> Option<(Side, Price, u64)> {
         let &(side, price) = self.index.get(&id)?;
@@ -111,23 +270,84 @@ impl OrderBook {
     }
 
     /// All trades so far, oldest first.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// book.apply(Event::Execute { id: 3, side: Side::Ask, qty: 4 })?;
+    /// let trades = book.trades();
+    /// assert_eq!(trades.len(), 1);
+    /// assert_eq!(trades[0].price, Price(99));
+    /// assert_eq!(trades[0].qty, 4);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn trades(&self) -> &[Trade] {
         &self.trades
     }
 
     /// Discards the trade log (statistics are kept).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// book.apply(Event::Execute { id: 3, side: Side::Ask, qty: 4 })?;
+    /// book.clear_trades();
+    /// assert!(book.trades().is_empty());
+    /// assert_eq!(book.resting_quantity(), 11); // the book itself is unchanged
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn clear_trades(&mut self) {
         self.trades.clear();
     }
 
     /// Cumulative quantity statistics.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// assert_eq!(book.stats().accepted, 15);
+    /// assert_eq!(book.stats().traded, 0);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn stats(&self) -> Stats {
         self.stats
     }
 
     /// Number of events applied so far.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// // one sequence number per applied event
+    /// assert_eq!(book.sequence(), 2);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn sequence(&self) -> u64 {
         self.seq
@@ -138,6 +358,21 @@ impl OrderBook {
     /// # Errors
     /// [`OrderBookError::InvalidWindow`] if `n == 0`;
     /// [`OrderBookError::NoTrades`] if the log is empty.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// book.apply(Event::Execute { id: 3, side: Side::Ask, qty: 4 })?;
+    /// assert_eq!(book.vwap_last(1)?, 99.0);
+    /// assert!(book.vwap_last(0).is_err()); // a zero window is invalid
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn vwap_last(&self, n: usize) -> Result<f64, OrderBookError> {
         if n == 0 {
             return Err(OrderBookError::InvalidWindow);
@@ -151,6 +386,21 @@ impl OrderBook {
     /// # Errors
     /// [`OrderBookError::InvalidWindow`] if `from_seq > to_seq`;
     /// [`OrderBookError::NoTrades`] if no trade lies in the window.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// book.apply(Event::Execute { id: 3, side: Side::Ask, qty: 4 })?; // seq 3
+    /// assert_eq!(book.vwap_window(3, 3)?, 99.0);
+    /// assert!(matches!(book.vwap_window(1, 2), Err(OrderBookError::NoTrades)));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn vwap_window(&self, from_seq: u64, to_seq: u64) -> Result<f64, OrderBookError> {
         if from_seq > to_seq {
             return Err(OrderBookError::InvalidWindow);
@@ -166,6 +416,22 @@ impl OrderBook {
     ///
     /// # Errors
     /// See [`OrderBookError`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError, Price, Side};
+    /// # fn main() -> Result<(), OrderBookError> {
+    /// let mut book = OrderBook::new();
+    /// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 })?;
+    /// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 })?;
+    /// // A bid at or above the best ask crosses the book and trades.
+    /// let trades = book.apply(Event::Add { id: 4, side: Side::Bid, price: Price(101), qty: 3 })?;
+    /// assert_eq!(trades, 1);
+    /// assert_eq!(book.level_qty(Side::Ask, Price(101)), 2);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn apply(&mut self, event: Event) -> Result<usize, OrderBookError> {
         let before = self.trades.len();
         match event {
@@ -184,6 +450,13 @@ impl OrderBook {
             Event::Execute { id, side, qty } => self.market(id, side, qty)?,
             Event::ExecuteOrder { id, qty } => self.execute_order(id, qty)?,
         }
+        // Quantity conservation: every accepted unit is resting, traded (on both
+        // sides), cancelled or expired. Checked after every event in debug builds.
+        let s = self.stats;
+        debug_assert!(
+            s.accepted == self.resting_quantity() + 2 * s.traded + s.cancelled + s.expired,
+            "postcondition failed: accepted == resting + 2 * traded + cancelled + expired"
+        );
         Ok(self.trades.len() - before)
     }
 
@@ -192,6 +465,20 @@ impl OrderBook {
     ///
     /// # Errors
     /// [`ReplayError`] with the index of the failing event.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::{Event, OrderBook, Price, Side};
+    ///
+    /// let events = vec![
+    ///     Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 },
+    ///     Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 },
+    ///     Event::Add { id: 3, side: Side::Bid, price: Price(101), qty: 5 },
+    /// ];
+    /// let mut book = OrderBook::new();
+    /// assert_eq!(book.replay(events).unwrap(), 1); // one trade in total
+    /// ```
     pub fn replay<I: IntoIterator<Item = Event>>(
         &mut self,
         events: I,

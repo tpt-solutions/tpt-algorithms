@@ -2,11 +2,28 @@
 //! Plain data types.
 
 /// Price in integer ticks.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_orderbook::Price;
+///
+/// // Prices are integer ticks, so ordering is exact.
+/// assert!(Price(101) > Price(99));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Price(pub i64);
 
 /// Side of the book.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_orderbook::Side;
+///
+/// assert_eq!(Side::Bid.opposite(), Side::Ask);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Side {
@@ -18,6 +35,14 @@ pub enum Side {
 
 impl Side {
     /// The opposite side.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_orderbook::Side;
+    ///
+    /// assert_eq!(Side::Ask.opposite(), Side::Bid);
+    /// ```
     #[must_use]
     pub fn opposite(self) -> Self {
         match self {
@@ -28,6 +53,19 @@ impl Side {
 }
 
 /// An order book event.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(feature = "alloc")] {
+/// use tpt_algo_orderbook::{Event, OrderBook, Price, Side};
+///
+/// let mut book = OrderBook::new();
+/// book.apply(Event::Add { id: 1, side: Side::Ask, price: Price(101), qty: 5 }).unwrap();
+/// book.apply(Event::Modify { id: 1, new_qty: Some(3), new_price: None }).unwrap(); // size reduction
+/// assert_eq!(book.order(1), Some((Side::Ask, Price(101), 3)));
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Event {
@@ -78,6 +116,23 @@ pub enum Event {
 }
 
 /// A single trade.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(feature = "alloc")] {
+/// use tpt_algo_orderbook::{Event, OrderBook, Price, Side};
+///
+/// let mut book = OrderBook::new();
+/// book.apply(Event::Add { id: 1, side: Side::Bid, price: Price(99), qty: 10 }).unwrap();
+/// book.apply(Event::Add { id: 2, side: Side::Ask, price: Price(101), qty: 5 }).unwrap();
+/// book.apply(Event::Execute { id: 3, side: Side::Ask, qty: 4 }).unwrap();
+/// let t = book.trades()[0];
+/// assert_eq!(t.aggressor_side, Side::Ask);
+/// assert_eq!(t.aggressor_id, Some(3));
+/// assert_eq!(t.resting_id, 1);
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trade {

@@ -2,6 +2,18 @@
 //! Error type.
 
 /// Errors returned by order book operations.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(feature = "alloc")] {
+/// use tpt_algo_orderbook::{Event, OrderBook, OrderBookError};
+///
+/// let mut book = OrderBook::new();
+/// let err = book.apply(Event::Cancel { id: 42 }).unwrap_err();
+/// assert_eq!(err, OrderBookError::UnknownOrderId(42));
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum OrderBookError {
     /// An order quantity of zero was supplied.
