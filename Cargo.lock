@@ -734,6 +734,7 @@ dependencies = [
  "proptest",
  "serde",
  "thiserror",
+ "tpt-algo-math-core",
  "tpt-algo-synth-data",
 ]
 

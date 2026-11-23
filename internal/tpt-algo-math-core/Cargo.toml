@@ -12,11 +12,14 @@ default = ["std"]
 std = ["alloc"]
 alloc = []
 serde = ["dep:serde"]
+# Shared proptest strategies (test-only; needs std).
+proptest = ["std", "dep:proptest"]
 
 [dependencies]
 libm.workspace = true
 serde = { workspace = true, optional = true }
 thiserror.workspace = true
+proptest = { workspace = true, optional = true }
 
 [lints]
 workspace = true

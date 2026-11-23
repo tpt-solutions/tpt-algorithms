@@ -7,6 +7,7 @@
 //! - [`rng`]: seeded SplitMix64 generator (deterministic, `no_std`).
 //! - [`error`]: the shared [`MathError`] type.
 //! - [`contract`]: `requires!` / `ensures!` debug-assertion helpers.
+//! - `strategies`: shared proptest strategies (feature `proptest`).
 //!
 //! The crate is `no_std` by default when built with `--no-default-features`.
 
@@ -20,6 +21,8 @@ pub mod error;
 pub mod fixed;
 pub mod rng;
 pub mod stats;
+#[cfg(feature = "proptest")]
+pub mod strategies;
 pub mod tolerance;
 
 pub use error::MathError;

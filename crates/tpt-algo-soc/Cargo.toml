@@ -23,6 +23,7 @@ thiserror.workspace = true
 [dev-dependencies]
 proptest.workspace = true
 tpt-algo-synth-data.workspace = true
+tpt-algo-math-core = { workspace = true, features = ["proptest"] }
 
 [lints]
 workspace = true

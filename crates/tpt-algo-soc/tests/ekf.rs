@@ -3,6 +3,7 @@
 #![allow(clippy::unwrap_used)]
 
 use proptest::prelude::*;
+use tpt_algo_math_core::strategies::{seed, unit_interval};
 use tpt_algo_soc::{CellParams, Filter, Initialized, Model, NoiseConfig, OcvCurve, SocError};
 
 type F = Filter<Initialized, 5>;
@@ -197,8 +198,8 @@ fn synthetic_noisy_discharge_rmse() {
 proptest! {
     #[test]
     fn soc_in_unit_interval_and_cov_psd(
-        soc0 in 0.0f64..=1.0,
-        seed in any::<u64>(),
+        soc0 in unit_interval(),
+        seed in seed(),
         currents in proptest::collection::vec(-5.0f64..5.0, 1..200),
         dt in 0.1f64..60.0,
     ) {

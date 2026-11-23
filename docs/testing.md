@@ -36,6 +36,10 @@ tolerance from the source's stated bound, not from what the code happens to prod
   seconds per crate.
 - Name properties after the invariant, for example `book_is_never_crossed`.
 - Store regressions in `proptest-regressions/` and commit them.
+- Generic strategies (`unit_interval`, `positive_finite`, `non_negative_finite`, `seed`) live in
+  `tpt-algo-math-core::strategies`. Enable them with a dev-dependency on
+  `tpt-algo-math-core = { workspace = true, features = ["proptest"] }`. Domain generators stay in
+  each crate's tests.
 
 ## Fixtures
 
