@@ -7,6 +7,16 @@ use crate::model::{Matrix, EPS};
 use crate::{Problem, RoutingError, Solution};
 
 /// Local search configuration.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::Config;
+///
+/// let cfg = Config { max_iterations: 1_000 };
+/// assert_eq!(Config::default().max_iterations, 100_000);
+/// assert!(cfg.max_iterations < Config::default().max_iterations);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Config {
@@ -34,6 +44,30 @@ impl Default for Config {
 /// # Errors
 /// [`RoutingError::InvalidSolution`] if `solution` is not a valid, feasible
 /// solution of `problem` on entry.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::{Customer, Problem, RoutingError};
+/// # fn main() -> Result<(), RoutingError> {
+/// let customers = vec![
+///     Customer::new(1.0, 0.0, 5.0),
+///     Customer::new(2.0, 0.0, 5.0),
+///     Customer::new(-1.0, 0.0, 5.0),
+///     Customer::new(-2.0, 0.0, 5.0),
+/// ];
+/// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+/// use tpt_algo_routing::{local_search, Config, Solution};
+///
+/// // Start from one customer per route, then let local search merge routes.
+/// let mut sol = Solution { routes: vec![vec![0], vec![1], vec![2], vec![3]] };
+/// let before = sol.cost(&problem);
+/// let moves = local_search(&problem, &mut sol, &Config::default())?;
+/// assert!(moves > 0);
+/// assert!(sol.cost(&problem) < before);
+/// # Ok(())
+/// # }
+/// ```
 pub fn local_search(
     problem: &Problem,
     solution: &mut Solution,
@@ -50,6 +84,11 @@ pub fn local_search(
     {
         applied += 1;
         solution.routes.retain(|r| !r.is_empty());
+        // Capacity and time-window limits must hold after every applied move.
+        debug_assert!(
+            solution.routes.iter().all(|r| m.feasible(problem, r)),
+            "postcondition failed: every route respects capacity and time windows"
+        );
     }
     Ok(applied)
 }

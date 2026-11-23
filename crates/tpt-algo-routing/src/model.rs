@@ -14,6 +14,16 @@ pub(crate) const EPS: f64 = 1e-9;
 ///
 /// A vehicle may arrive before `earliest` and wait; arriving after `latest`
 /// is infeasible.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::{Customer, TimeWindow};
+///
+/// let w = TimeWindow { earliest: 10.0, latest: 20.0 };
+/// let c = Customer::new(1.0, 0.0, 1.0).with_window(w.earliest, w.latest, 2.0);
+/// assert_eq!(c.window, Some(w));
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TimeWindow {
@@ -24,6 +34,16 @@ pub struct TimeWindow {
 }
 
 /// A customer to be served exactly once.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::Customer;
+///
+/// // A customer at (3, 4) with demand 2, a time window [0, 50] and 5 units of service.
+/// let c = Customer::new(3.0, 4.0, 2.0).with_window(0.0, 50.0, 5.0);
+/// assert_eq!(c.demand, 2.0);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Customer {
@@ -41,6 +61,16 @@ pub struct Customer {
 
 impl Customer {
     /// Customer without a time window and with zero service time.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::Customer;
+    ///
+    /// let c = Customer::new(3.0, 4.0, 2.0);
+    /// assert_eq!(c.service_time, 0.0);
+    /// assert!(c.window.is_none());
+    /// ```
     #[must_use]
     pub fn new(x: f64, y: f64, demand: f64) -> Self {
         Self {
@@ -53,6 +83,16 @@ impl Customer {
     }
 
     /// Adds a time window and service time.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::Customer;
+    ///
+    /// let c = Customer::new(0.0, 0.0, 1.0).with_window(5.0, 15.0, 3.0);
+    /// assert_eq!(c.service_time, 3.0);
+    /// assert_eq!(c.window.map(|w| w.latest), Some(15.0));
+    /// ```
     #[must_use]
     pub fn with_window(mut self, earliest: f64, latest: f64, service_time: f64) -> Self {
         self.window = Some(TimeWindow { earliest, latest });
@@ -65,6 +105,24 @@ impl Customer {
 ///
 /// Distances are Euclidean; travel time equals distance. Vehicles leave the
 /// depot at time 0.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::{Customer, Problem, RoutingError};
+/// # fn main() -> Result<(), RoutingError> {
+/// let customers = vec![
+///     Customer::new(1.0, 0.0, 5.0),
+///     Customer::new(2.0, 0.0, 5.0),
+///     Customer::new(-1.0, 0.0, 5.0),
+///     Customer::new(-2.0, 0.0, 5.0),
+/// ];
+/// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+/// assert_eq!(problem.capacity(), 10.0);
+/// assert_eq!(problem.customers().len(), 4);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Problem {
     depot: (f64, f64),
@@ -82,6 +140,15 @@ impl Problem {
     /// capacity, negative demand/service time or inverted windows;
     /// [`RoutingError::InfeasibleCustomer`] if a customer alone violates
     /// capacity or its window.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem};
+    ///
+    /// let problem = Problem::new((0.0, 0.0), 10.0, vec![Customer::new(1.0, 0.0, 5.0)]).unwrap();
+    /// assert_eq!(problem.depot(), (0.0, 0.0));
+    /// ```
     pub fn new(
         depot: (f64, f64),
         capacity: f64,
@@ -102,6 +169,24 @@ impl Problem {
     ///
     /// # Errors
     /// [`RoutingError::InvalidInput`] if `max` is zero while customers exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// let limited = problem.with_max_vehicles(2)?;
+    /// assert_eq!(limited.max_vehicles(), Some(2));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_max_vehicles(mut self, max: usize) -> Result<Self, RoutingError> {
         if max == 0 && !self.customers.is_empty() {
             return Err(RoutingError::InvalidInput("max_vehicles must be positive"));
@@ -114,6 +199,25 @@ impl Problem {
     ///
     /// # Errors
     /// Same validation as [`Problem::new`] is re-run.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// // Every route must return to the depot by time 30.
+    /// let timed = problem.with_depot_due(30.0)?;
+    /// assert_eq!(timed.depot_due(), 30.0);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn with_depot_due(mut self, due: f64) -> Result<Self, RoutingError> {
         if due.is_nan() || due < 0.0 {
             return Err(RoutingError::InvalidInput("depot_due must be >= 0"));
@@ -156,30 +260,115 @@ impl Problem {
     }
 
     /// Depot coordinates.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// assert_eq!(problem.depot(), (0.0, 0.0));
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn depot(&self) -> (f64, f64) {
         self.depot
     }
 
     /// Vehicle capacity.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// assert_eq!(problem.capacity(), 10.0);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn capacity(&self) -> f64 {
         self.capacity
     }
 
     /// Maximum number of vehicles, if limited.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// assert_eq!(problem.max_vehicles(), None); // unlimited by default
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn max_vehicles(&self) -> Option<usize> {
         self.max_vehicles
     }
 
     /// Latest depot return time (infinite by default).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// assert!(problem.depot_due().is_infinite()); // no deadline by default
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn depot_due(&self) -> f64 {
         self.depot_due
     }
 
     /// The customers.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// assert_eq!(problem.customers()[0].x, 1.0);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn customers(&self) -> &[Customer] {
         &self.customers
@@ -273,6 +462,28 @@ impl Matrix {
 
 /// A set of routes; each route lists customer indices in visiting order.
 /// The depot is implicit at both ends.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::{Customer, Problem, RoutingError};
+/// # fn main() -> Result<(), RoutingError> {
+/// let customers = vec![
+///     Customer::new(1.0, 0.0, 5.0),
+///     Customer::new(2.0, 0.0, 5.0),
+///     Customer::new(-1.0, 0.0, 5.0),
+///     Customer::new(-2.0, 0.0, 5.0),
+/// ];
+/// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+/// use tpt_algo_routing::Solution;
+///
+/// // Two routes of two customers each, by customer index.
+/// let sol = Solution { routes: vec![vec![0, 1], vec![2, 3]] };
+/// sol.validate(&problem)?;
+/// assert_eq!(sol.vehicles_used(), 2);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Solution {
     /// The routes.
@@ -284,6 +495,26 @@ impl Solution {
     ///
     /// Customer indices must be in range; call [`Solution::validate`] first
     /// for solutions of unknown origin.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// use tpt_algo_routing::Solution;
+    ///
+    /// let sol = Solution { routes: vec![vec![0, 1], vec![2, 3]] };
+    /// assert!((sol.cost(&problem) - 8.0).abs() < 1e-9);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn cost(&self, problem: &Problem) -> f64 {
         let m = Matrix::new(problem);
@@ -291,6 +522,26 @@ impl Solution {
     }
 
     /// Number of non-empty routes.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// use tpt_algo_routing::Solution;
+    ///
+    /// let sol = Solution { routes: vec![vec![0, 1, 2, 3]] };
+    /// assert_eq!(sol.vehicles_used(), 1);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn vehicles_used(&self) -> usize {
         self.routes.iter().filter(|r| !r.is_empty()).count()
@@ -301,6 +552,27 @@ impl Solution {
     ///
     /// # Errors
     /// [`RoutingError::InvalidSolution`] or [`RoutingError::TooManyVehicles`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_routing::{Customer, Problem, RoutingError};
+    /// # fn main() -> Result<(), RoutingError> {
+    /// let customers = vec![
+    ///     Customer::new(1.0, 0.0, 5.0),
+    ///     Customer::new(2.0, 0.0, 5.0),
+    ///     Customer::new(-1.0, 0.0, 5.0),
+    ///     Customer::new(-2.0, 0.0, 5.0),
+    /// ];
+    /// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+    /// use tpt_algo_routing::{RoutingError, Solution};
+    ///
+    /// // Customer 0 served twice, customer 3 never: not a valid solution.
+    /// let bad = Solution { routes: vec![vec![0, 0, 1, 2]] };
+    /// assert!(matches!(bad.validate(&problem), Err(RoutingError::InvalidSolution(_))));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn validate(&self, problem: &Problem) -> Result<(), RoutingError> {
         let n = problem.customers.len();
         let mut seen = vec![false; n];

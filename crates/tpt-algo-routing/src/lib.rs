@@ -24,6 +24,24 @@
 //!   with time window constraints", Operations Research 35(2), 1987.
 //! - Toth & Vigo (eds.), "Vehicle Routing: Problems, Methods, and
 //!   Applications", SIAM, 2nd ed., 2014.
+//! # Example
+//!
+//! ```
+//! # #[cfg(feature = "alloc")] {
+//! use tpt_algo_routing::{solve, Config, Customer, Problem};
+//!
+//! let customers = vec![
+//!     Customer::new(1.0, 0.0, 5.0),
+//!     Customer::new(2.0, 0.0, 5.0),
+//!     Customer::new(-1.0, 0.0, 5.0),
+//!     Customer::new(-2.0, 0.0, 5.0),
+//! ];
+//! let problem = Problem::new((0.0, 0.0), 10.0, customers).unwrap();
+//! let solution = solve(&problem, &Config::default()).unwrap();
+//! assert!((solution.cost(&problem) - 8.0).abs() < 1e-9);
+//! # }
+//! ```
+//!
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]
@@ -50,6 +68,18 @@ pub use savings::clarke_wright_savings;
 ///
 /// # Errors
 /// Propagates errors from [`clarke_wright_savings`] and [`local_search`].
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::{solve, Config, Customer, Problem};
+///
+/// let customers = vec![Customer::new(1.0, 0.0, 5.0), Customer::new(-1.0, 0.0, 5.0)];
+/// let problem = Problem::new((0.0, 0.0), 10.0, customers).unwrap();
+/// let solution = solve(&problem, &Config::default()).unwrap();
+/// assert!(solution.validate(&problem).is_ok());
+/// assert_eq!(solution.vehicles_used(), 1); // both customers fit on one vehicle
+/// ```
 #[cfg(feature = "alloc")]
 pub fn solve(problem: &Problem, config: &Config) -> Result<Solution, RoutingError> {
     let mut solution = clarke_wright_savings(problem)?;

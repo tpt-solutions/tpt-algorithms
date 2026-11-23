@@ -15,6 +15,26 @@ use crate::{Problem, RoutingError, Solution};
 ///
 /// # Errors
 /// [`RoutingError::TooManyVehicles`] if the vehicle limit is exceeded.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_routing::{Customer, Problem, RoutingError};
+/// # fn main() -> Result<(), RoutingError> {
+/// let customers = vec![
+///     Customer::new(1.0, 0.0, 5.0),
+///     Customer::new(2.0, 0.0, 5.0),
+///     Customer::new(-1.0, 0.0, 5.0),
+///     Customer::new(-2.0, 0.0, 5.0),
+/// ];
+/// let problem = Problem::new((0.0, 0.0), 10.0, customers)?;
+/// use tpt_algo_routing::clarke_wright_savings;
+///
+/// let sol = clarke_wright_savings(&problem)?;
+/// sol.validate(&problem)?; // every customer served once, all routes feasible
+/// # Ok(())
+/// # }
+/// ```
 pub fn clarke_wright_savings(problem: &Problem) -> Result<Solution, RoutingError> {
     let n = problem.customers().len();
     let m = Matrix::new(problem);
