@@ -6,6 +6,7 @@
 //! - [`fixed`]: Q32.32 fixed-point arithmetic for deterministic code paths.
 //! - [`rng`]: seeded SplitMix64 generator (deterministic, `no_std`).
 //! - [`error`]: the shared [`MathError`] type.
+//! - [`contract`]: `requires!` / `ensures!` debug-assertion helpers.
 //!
 //! The crate is `no_std` by default when built with `--no-default-features`.
 
@@ -14,6 +15,7 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+pub mod contract;
 pub mod error;
 pub mod fixed;
 pub mod rng;
