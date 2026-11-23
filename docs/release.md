@@ -20,7 +20,7 @@ Use Conventional Commits so release-plz can generate changelogs:
 
 ## Automated flow
 
-1. Merging a PR to `master` triggers [release-plz](../.github/workflows/release-plz.yml), which
+1. Merging a PR to `master` triggers `.github/workflows/release-plz.yml`, which
    opens or updates a single release PR.
 2. The release PR bumps versions and updates CHANGELOG files for changed `tpt-algo-*` crates.
 3. Merging the release PR publishes the changed crates to crates.io in dependency order.

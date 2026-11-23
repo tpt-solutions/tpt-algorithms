@@ -6,8 +6,8 @@ Written for: maintainers and contributors who need to know what license applies 
 
 All first-party code is dual-licensed under **MIT OR Apache-2.0**, at the licensee's option:
 
-- [LICENSE-MIT](../LICENSE-MIT)
-- [LICENSE-APACHE](../LICENSE-APACHE)
+- `LICENSE-MIT`
+- `LICENSE-APACHE`
 
 Copyright is held by TPT Solutions. The `license = "MIT OR Apache-2.0"` field is set once in
 `[workspace.package]` and inherited by every crate.
@@ -40,7 +40,7 @@ Summary (full process in [dependencies.md](dependencies.md)):
 - Allowed: MIT, BSD-2-Clause, BSD-3-Clause, ISC, Zlib, Unicode-DFS-2016, Unicode-3.0.
 - Allowed by election: `MIT OR Apache-2.0` (the MIT branch is taken).
 - Banned: Apache-2.0-only, GPL, AGPL, LGPL, SSPL, EUPL, CC-BY-NC, and unlicensed crates.
-- Enforced by `cargo deny check` using [deny.toml](../deny.toml) in CI.
+- Enforced by `cargo deny check` using `deny.toml` in CI.
 
 ## Data licensing
 

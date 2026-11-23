@@ -3,7 +3,7 @@
 Written for: maintainers running dataset validation.
 
 Datasets are never committed. They are downloaded on demand by
-[scripts/fetch-dataset.sh](../scripts/fetch-dataset.sh), checked against a SHA-256 digest, and
+`scripts/fetch-dataset.sh`, checked against a SHA-256 digest, and
 cached in `.datasets/` (gitignored). Before any dataset is used in a published workflow, its terms
 must be checked and recorded here.
 

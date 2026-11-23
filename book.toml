@@ -1,0 +1,9 @@
+[book]
+title = "tpt-algorithms"
+description = "Permissively licensed, clean-room algorithm crates."
+authors = ["TPT Solutions"]
+language = "en"
+src = "docs"
+
+[build]
+build-dir = "target/book"
