@@ -6,8 +6,8 @@ rust-version.workspace = true
 license.workspace = true
 description = "Deterministic BFT consensus state machine (HotStuff-family), fixed-point only"
 readme = "README.md"
-keywords = ["algorithms", "no-std", "consensus"]
-categories = ["algorithms", "science", "no-std"]
+keywords = ["bft", "consensus", "hotstuff", "distributed", "no-std"]
+categories = ["algorithms", "simulation", "no-std"]
 
 [features]
 default = ["std"]
