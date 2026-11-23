@@ -1,6 +1,9 @@
 [package]
 name = "tpt-algo-geometry"
 description = "Internal shared 2D/3D geometry and kinematics helpers."
+readme = "README.md"
+keywords = ["geometry", "kinematics", "vectors"]
+categories = ["mathematics", "science::robotics"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
