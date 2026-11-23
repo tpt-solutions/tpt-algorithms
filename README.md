@@ -25,7 +25,11 @@ goal is MIT or Apache-2.0 alternatives to paywalled or copyleft-locked industry 
 | `tpt-algo-swarm` | Velocity obstacles and path planning | Implemented; scenario validation |
 | `tpt-algo-consensus` | BFT consensus state machine (HotStuff family) | Implemented; signatures not verified (see its README) |
 
-Internal, unpublished: `tpt-algo-math-core`, `tpt-algo-geometry`, `tpt-algo-synth-data`.
+Internal, unpublished: `tpt-algo-math-core`, `tpt-algo-geometry`, `tpt-algo-synth-data`,
+`tpt-algo-bindings-core`.
+
+Python (`tpt-algo-py`) and WebAssembly (`tpt-algo-wasm`) bindings wrap the crates above. They are
+built separately with maturin and wasm-pack. See [docs/bindings.md](docs/bindings.md).
 
 ## Building and testing
 
@@ -45,6 +49,11 @@ Dataset validation tests are `#[ignore]` and need `TPT_DATASET_DIR`. See
 - [docs/release.md](docs/release.md)
 - [docs/maintenance.md](docs/maintenance.md)
 - [docs/formal-verification.md](docs/formal-verification.md)
+
+## Contributing
+
+Contributions are made through issues only. Please open an issue to report a bug, ask a question
+or propose a change. Pull requests are not accepted.
 
 ## Licence
 
