@@ -218,6 +218,11 @@ pub fn avoid(
     avoid_iter(agent, neighbors.iter(), cfg)
 }
 
+const HYSTERESIS: f64 = 0.5;
+/// Small cost for deviating to the left of the preferred velocity (a
+/// right-hand rule) so that symmetric encounters resolve consistently.
+const SIDE_BIAS: f64 = 0.1;
+
 fn avoid_iter<'a, I>(agent: &Agent, others: I, cfg: &AvoidanceConfig) -> Result<Vec2, SwarmError>
 where
     I: Iterator<Item = &'a Agent> + Clone,
@@ -245,24 +250,28 @@ where
         best
     };
 
-    let mut best_t = ttc(pref);
-    if best_t.is_infinite() {
+    let best_t = core::cell::Cell::new(ttc(pref));
+    if best_t.get().is_infinite() {
         return Ok(pref);
     }
     let mut best_v = pref;
-    let mut best_d = 0.0;
+    let mut best_d = HYSTERESIS * (pref - agent.velocity).norm_sq();
     let mut consider = |cand: Vec2| {
         let t = ttc(cand);
-        let d = (cand - pref).norm_sq();
-        let better = match (t.is_infinite(), best_t.is_infinite()) {
+        // Distance to the preferred velocity, plus a small hysteresis term
+        // towards the current velocity that damps left/right oscillation.
+        let d = (cand - pref).norm_sq()
+            + HYSTERESIS * (cand - agent.velocity).norm_sq()
+            + SIDE_BIAS * (pref.x * cand.y - pref.y * cand.x);
+        let better = match (t.is_infinite(), best_t.get().is_infinite()) {
             (true, true) => d < best_d,
             (true, false) => true,
             (false, true) => false,
-            (false, false) => t > best_t || (t == best_t && d < best_d),
+            (false, false) => t > best_t.get() || (t == best_t.get() && d < best_d),
         };
         if better {
             best_v = cand;
-            best_t = t;
+            best_t.set(t);
             best_d = d;
         }
     };
@@ -275,7 +284,7 @@ where
     }
     // Stopping is only a fallback: preferring it among free candidates makes
     // two agents blocking each other's goal path freeze in place.
-    if best_t.is_finite() {
+    if best_t.get().is_finite() {
         consider(Vec2::ZERO);
     }
     Ok(best_v.clamp_norm(agent.max_speed))

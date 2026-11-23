@@ -263,6 +263,7 @@ fn validate_rows<R: AsRef<[f64]>>(data: &[R], dim: usize) -> Result<Vec<&[f64]>,
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     fn grid() -> Vec<Vec<f64>> {
         (0..100)
