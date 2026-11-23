@@ -2,6 +2,15 @@
 //! Error type.
 
 /// Errors returned by model construction and filter operations.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_soc::{OcvCurve, SocError};
+///
+/// let err = OcvCurve::new([(0.0, 3.0), (0.0, 4.0)]).unwrap_err();
+/// assert!(matches!(err, SocError::InvalidOcvTable(_)));
+/// ```
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum SocError {
     /// Capacity must be finite and strictly positive.

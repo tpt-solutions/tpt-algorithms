@@ -7,6 +7,15 @@ use crate::SocError;
 ///
 /// Breakpoints are `(soc, volts)` pairs with strictly increasing `soc`
 /// inside `[0, 1]`.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_soc::OcvCurve;
+///
+/// let ocv = OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (1.0, 4.2)]).unwrap();
+/// assert!((ocv.voltage(0.5) - 3.7).abs() < 1e-12);
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct OcvCurve<const N: usize> {
     points: [(f64, f64); N],
@@ -18,6 +27,18 @@ impl<const N: usize> OcvCurve<N> {
     /// # Errors
     /// [`SocError::InvalidOcvTable`] if `N < 2`, a value is non-finite, a SoC
     /// is outside `[0,1]`, or SoC is not strictly increasing.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::{OcvCurve, SocError};
+    ///
+    /// // SoC must be strictly increasing.
+    /// assert!(matches!(
+    ///     OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (0.5, 3.8)]),
+    ///     Err(SocError::InvalidOcvTable(_))
+    /// ));
+    /// ```
     pub fn new(points: [(f64, f64); N]) -> Result<Self, SocError> {
         if N < 2 {
             return Err(SocError::InvalidOcvTable("need at least two points"));
@@ -48,6 +69,16 @@ impl<const N: usize> OcvCurve<N> {
     }
 
     /// OCV in volts at `soc`; `soc` is clamped to the table's range.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::OcvCurve;
+    ///
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (1.0, 4.0)]).unwrap();
+    /// assert!((ocv.voltage(0.25) - 3.25).abs() < 1e-12); // linear interpolation
+    /// assert_eq!(ocv.voltage(2.0), 4.0); // clamped to the table
+    /// ```
     #[must_use]
     pub fn voltage(&self, soc: f64) -> f64 {
         let lo = self.points[0].0;
@@ -60,6 +91,15 @@ impl<const N: usize> OcvCurve<N> {
     }
 
     /// Local slope `dOCV/dSoC` (volts per unit SoC) at `soc`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::OcvCurve;
+    ///
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (1.0, 4.0)]).unwrap();
+    /// assert!((ocv.slope(0.5) - 1.0).abs() < 1e-12);
+    /// ```
     #[must_use]
     pub fn slope(&self, soc: f64) -> f64 {
         let i = self.segment(soc);
@@ -70,6 +110,15 @@ impl<const N: usize> OcvCurve<N> {
 }
 
 /// Scalar cell parameters.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_soc::CellParams;
+///
+/// let p = CellParams { capacity_ah: 2.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+/// assert!(p.r1 > 0.0); // RC pair must have positive resistance and capacitance
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CellParams {
@@ -84,6 +133,20 @@ pub struct CellParams {
 }
 
 /// Validated battery model: parameters plus OCV curve.
+///
+/// # Example
+///
+/// ```
+/// use tpt_algo_soc::{CellParams, Filter, Model, NoiseConfig, OcvCurve, SocError};
+/// # fn main() -> Result<(), SocError> {
+/// let ocv = OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (1.0, 4.2)])?;
+/// let params = CellParams { capacity_ah: 2.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+/// let model = Model::new(params, ocv)?;
+/// let noise = NoiseConfig { process_soc: 1e-9, process_v1: 1e-6, measurement: 1e-4 };
+/// assert_eq!(model.params().r0, 0.05);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Model<const N: usize> {
     pub(crate) params: CellParams,
@@ -96,6 +159,17 @@ impl<const N: usize> Model<N> {
     /// # Errors
     /// [`SocError::InvalidCapacity`], [`SocError::InvalidResistance`] or
     /// [`SocError::InvalidCapacitance`] for out-of-range values.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::{CellParams, Model, OcvCurve, SocError};
+    ///
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (1.0, 4.2)])?;
+    /// let bad = CellParams { capacity_ah: 0.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+    /// assert!(matches!(Model::new(bad, ocv), Err(SocError::InvalidCapacity)));
+    /// # Ok::<(), SocError>(())
+    /// ```
     pub fn new(params: CellParams, ocv: OcvCurve<N>) -> Result<Self, SocError> {
         if !(params.capacity_ah.is_finite() && params.capacity_ah > 0.0) {
             return Err(SocError::InvalidCapacity);
@@ -111,18 +185,62 @@ impl<const N: usize> Model<N> {
     }
 
     /// Scalar parameters.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::{CellParams, Filter, Model, NoiseConfig, OcvCurve, SocError};
+    /// # fn main() -> Result<(), SocError> {
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (1.0, 4.2)])?;
+    /// let params = CellParams { capacity_ah: 2.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+    /// let model = Model::new(params, ocv)?;
+    /// let noise = NoiseConfig { process_soc: 1e-9, process_v1: 1e-6, measurement: 1e-4 };
+    /// assert_eq!(model.params().capacity_ah, 2.0);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn params(&self) -> &CellParams {
         &self.params
     }
 
     /// OCV curve.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::{CellParams, Filter, Model, NoiseConfig, OcvCurve, SocError};
+    /// # fn main() -> Result<(), SocError> {
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (1.0, 4.2)])?;
+    /// let params = CellParams { capacity_ah: 2.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+    /// let model = Model::new(params, ocv)?;
+    /// let noise = NoiseConfig { process_soc: 1e-9, process_v1: 1e-6, measurement: 1e-4 };
+    /// assert_eq!(model.ocv().voltage(1.0), 4.2);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn ocv(&self) -> &OcvCurve<N> {
         &self.ocv
     }
 
     /// Terminal voltage `OCV(soc) - v1 - R0*I` for discharge current `i`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::{CellParams, Filter, Model, NoiseConfig, OcvCurve, SocError};
+    /// # fn main() -> Result<(), SocError> {
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (1.0, 4.2)])?;
+    /// let params = CellParams { capacity_ah: 2.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+    /// let model = Model::new(params, ocv)?;
+    /// let noise = NoiseConfig { process_soc: 1e-9, process_v1: 1e-6, measurement: 1e-4 };
+    /// // OCV(0.5) - v1 - R0 * i = 3.7 - 0.0 - 0.05 * 2.0
+    /// let v = model.terminal_voltage(0.5, 0.0, 2.0);
+    /// assert!((v - 3.6).abs() < 1e-12);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
     pub fn terminal_voltage(&self, soc: f64, v1: f64, i: f64) -> f64 {
         self.ocv.voltage(soc) - v1 - self.params.r0 * i
@@ -134,6 +252,22 @@ impl<const N: usize> Model<N> {
     ///
     /// # Errors
     /// [`SocError::InvalidTimeStep`] or [`SocError::NonFinite`].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::{CellParams, Filter, Model, NoiseConfig, OcvCurve, SocError};
+    /// # fn main() -> Result<(), SocError> {
+    /// let ocv = OcvCurve::new([(0.0, 3.0), (0.5, 3.7), (1.0, 4.2)])?;
+    /// let params = CellParams { capacity_ah: 2.0, r0: 0.05, r1: 0.02, c1: 1000.0 };
+    /// let model = Model::new(params, ocv)?;
+    /// let noise = NoiseConfig { process_soc: 1e-9, process_v1: 1e-6, measurement: 1e-4 };
+    /// let (soc, v1) = model.step(0.8, 0.0, 2.0, 360.0)?; // 2 A for 6 minutes
+    /// assert!(soc < 0.8);
+    /// assert!(v1 > 0.0);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn step(&self, soc: f64, v1: f64, i: f64, dt: f64) -> Result<(f64, f64), SocError> {
         if !(dt.is_finite() && dt > 0.0) {
             return Err(SocError::InvalidTimeStep);
