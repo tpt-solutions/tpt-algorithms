@@ -65,6 +65,27 @@ pub struct NoiseConfig {
     pub measurement: f64,
 }
 
+impl Default for NoiseConfig {
+    /// Defaults matching the crate examples: process variances `1e-9` (SoC)
+    /// and `1e-6` (V1), measurement variance `1e-4` V^2 (10 mV sigma).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use tpt_algo_soc::NoiseConfig;
+    ///
+    /// let noise = NoiseConfig::default();
+    /// assert!(noise.measurement > 0.0); // valid input for Filter::new
+    /// ```
+    fn default() -> Self {
+        Self {
+            process_soc: 1e-9,
+            process_v1: 1e-6,
+            measurement: 1e-4,
+        }
+    }
+}
+
 /// Snapshot of the filter's estimate.
 ///
 /// # Example

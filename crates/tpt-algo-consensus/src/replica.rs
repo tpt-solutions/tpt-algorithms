@@ -314,7 +314,7 @@ impl Replica {
     }
 
     /// Queues a command to be proposed the next time this replica leads.
-    /// Without queued commands the leader proposes payload `0`.
+    /// Without queued commands the leader proposes an empty block (`payload: None`).
     ///
     /// # Example
     ///
@@ -919,7 +919,7 @@ impl Replica {
         let Some(parent) = self.blocks.get(&self.high_qc.block).copied() else {
             return Ok(());
         };
-        let payload = self.mempool.pop_front().unwrap_or(0);
+        let payload = self.mempool.pop_front();
         let block = Block::new(&parent, view, self.id, payload, self.high_qc)?;
         self.proposed_view = view;
         self.send(Recipient::All, Message::Proposal(block), out);
@@ -964,21 +964,21 @@ mod tests {
         let mut r = Replica::new(ReplicaId(0), cfg()).unwrap();
         r.start(0).unwrap();
         let g = Block::genesis();
-        let b1 = Block::new(&g, View(1), ReplicaId(1), 0, QuorumCert::genesis()).unwrap();
+        let b1 = Block::new(&g, View(1), ReplicaId(1), None, QuorumCert::genesis()).unwrap();
         // Proposal relayed by a non-leader.
         assert_eq!(
             r.handle(1, ReplicaId(2), &Message::Proposal(b1)),
             Err(ConsensusError::NotLeader { view: 1, sender: 2 })
         );
         // Proposal by the wrong proposer.
-        let wrong = Block::new(&g, View(1), ReplicaId(2), 0, QuorumCert::genesis()).unwrap();
+        let wrong = Block::new(&g, View(1), ReplicaId(2), None, QuorumCert::genesis()).unwrap();
         assert!(matches!(
             r.handle(1, ReplicaId(2), &Message::Proposal(wrong)),
             Err(ConsensusError::NotLeader { .. })
         ));
         // Tampered contents.
         let mut tampered = b1;
-        tampered.payload = 5;
+        tampered.payload = Some(5);
         assert_eq!(
             r.handle(1, ReplicaId(1), &Message::Proposal(tampered)),
             Err(ConsensusError::BlockIdMismatch)
@@ -1029,9 +1029,9 @@ mod tests {
         let mut r = Replica::new(ReplicaId(0), c).unwrap();
         r.start(0).unwrap();
         let g = Block::genesis();
-        let b1 = Block::new(&g, View(1), ReplicaId(1), 0, QuorumCert::genesis()).unwrap();
-        let b2 = Block::new(&b1, View(2), ReplicaId(2), 0, qc_n(&b1, 4)).unwrap();
-        let b3 = Block::new(&b2, View(3), ReplicaId(3), 0, qc_n(&b2, 4)).unwrap();
+        let b1 = Block::new(&g, View(1), ReplicaId(1), None, QuorumCert::genesis()).unwrap();
+        let b2 = Block::new(&b1, View(2), ReplicaId(2), None, qc_n(&b1, 4)).unwrap();
+        let b3 = Block::new(&b2, View(3), ReplicaId(3), None, qc_n(&b2, 4)).unwrap();
         r.handle(1, ReplicaId(1), &Message::Proposal(b1)).unwrap();
         r.handle(2, ReplicaId(2), &Message::Proposal(b2)).unwrap();
         r.handle(3, ReplicaId(3), &Message::Proposal(b3)).unwrap();
@@ -1039,11 +1039,11 @@ mod tests {
         assert_eq!(r.locked_qc().block, b1.id);
         assert_eq!(r.current_view(), View(4));
         // A fork from genesis in view 4 with an old certificate is unsafe.
-        let fork = Block::new(&g, View(4), ReplicaId(4), 1, QuorumCert::genesis()).unwrap();
+        let fork = Block::new(&g, View(4), ReplicaId(4), Some(1), QuorumCert::genesis()).unwrap();
         r.handle(4, ReplicaId(4), &Message::Proposal(fork)).unwrap();
         assert_eq!(r.last_voted_view(), View(3));
         // A proposal extending the lock in the same view is still voted for.
-        let b4 = Block::new(&b3, View(4), ReplicaId(4), 0, qc_n(&b3, 4)).unwrap();
+        let b4 = Block::new(&b3, View(4), ReplicaId(4), None, qc_n(&b3, 4)).unwrap();
         r.handle(5, ReplicaId(4), &Message::Proposal(b4)).unwrap();
         assert_eq!(r.last_voted_view(), View(4));
         // b4 carries QC(b3): b1 <- b2 <- b3 is a consecutive three-chain.

@@ -136,7 +136,7 @@ impl QuorumCert {
     /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
     /// use tpt_algo_consensus::Config;
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// assert!(cert(&b1).validate(&Config::new(4)?).is_ok());
     /// // An empty signer set is below quorum (3 when n = 4).
     /// let mut weak = cert(&b1);
@@ -186,9 +186,9 @@ impl QuorumCert {
 /// }
 /// use tpt_algo_consensus::Block;
 ///
-/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
 /// assert_eq!(b1.height, 1);
-/// assert_eq!(b1.payload, 10);
+/// assert_eq!(b1.payload, Some(10));
 /// # Ok(())
 /// # }
 /// ```
@@ -206,7 +206,7 @@ pub struct Block {
     /// Proposer; must be the leader of `view`.
     pub proposer: ReplicaId,
     /// Opaque command carried by the block.
-    pub payload: u64,
+    pub payload: Option<u64>,
     /// Quorum certificate for the parent.
     pub justify: QuorumCert,
 }
@@ -231,7 +231,7 @@ impl Block {
             view: View::GENESIS,
             height: 0,
             proposer: ReplicaId(0),
-            payload: 0,
+            payload: None,
             justify: QuorumCert::genesis(),
         }
     }
@@ -273,9 +273,9 @@ impl Block {
     /// }
     /// use tpt_algo_consensus::Block;
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// // The view must increase and the justification must certify the parent.
-    /// assert!(Block::new(&b1, View(1), ReplicaId(2), 11, cert(&b1)).is_err());
+    /// assert!(Block::new(&b1, View(1), ReplicaId(2), Some(11), cert(&b1)).is_err());
     /// # Ok(())
     /// # }
     /// ```
@@ -283,7 +283,7 @@ impl Block {
         parent: &Block,
         view: View,
         proposer: ReplicaId,
-        payload: u64,
+        payload: Option<u64>,
         justify: QuorumCert,
     ) -> Result<Self, ConsensusError> {
         if justify.block != parent.id || justify.view != parent.view {
@@ -315,9 +315,9 @@ impl Block {
     /// ```
     /// use tpt_algo_consensus::{Block, BlockId, ReplicaId, View};
     ///
-    /// let id = Block::compute_id(BlockId(7), View(2), 3, ReplicaId(1), 42, View(1));
+    /// let id = Block::compute_id(BlockId(7), View(2), 3, ReplicaId(1), Some(42), View(1));
     /// // Identical fields always give the same digest.
-    /// assert_eq!(id, Block::compute_id(BlockId(7), View(2), 3, ReplicaId(1), 42, View(1)));
+    /// assert_eq!(id, Block::compute_id(BlockId(7), View(2), 3, ReplicaId(1), Some(42), View(1)));
     /// assert_ne!(id, BlockId(0));
     /// ```
     #[must_use]
@@ -326,7 +326,7 @@ impl Block {
         view: View,
         height: u64,
         proposer: ReplicaId,
-        payload: u64,
+        payload: Option<u64>,
         justify_view: View,
     ) -> BlockId {
         let mut h = 0x5450_545F_4253_5446_u64;
@@ -334,7 +334,14 @@ impl Block {
         h = absorb(h, view.0);
         h = absorb(h, height);
         h = absorb(h, u64::from(proposer.0));
-        h = absorb(h, payload);
+        // Tag the payload so an empty block and a block with command 0 hash differently.
+        match payload {
+            None => h = absorb(h, 0),
+            Some(command) => {
+                h = absorb(h, 1);
+                h = absorb(h, command);
+            }
+        }
         h = absorb(h, justify_view.0);
         BlockId(h.max(1))
     }
@@ -357,7 +364,7 @@ impl Block {
     /// }
     /// use tpt_algo_consensus::Block;
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// assert!(b1.has_valid_id());
     /// # Ok(())
     /// # }
@@ -396,13 +403,13 @@ mod tests {
     fn block_construction_and_ids() {
         let cfg = Config::new(4).unwrap();
         let g = Block::genesis();
-        let b1 = Block::new(&g, View(1), ReplicaId(1), 7, QuorumCert::genesis()).unwrap();
+        let b1 = Block::new(&g, View(1), ReplicaId(1), Some(7), QuorumCert::genesis()).unwrap();
         assert!(b1.has_valid_id());
         assert_eq!(b1.height, 1);
         assert_ne!(b1.id, GENESIS_ID);
-        let again = Block::new(&g, View(1), ReplicaId(1), 7, QuorumCert::genesis()).unwrap();
+        let again = Block::new(&g, View(1), ReplicaId(1), Some(7), QuorumCert::genesis()).unwrap();
         assert_eq!(again.id, b1.id);
-        let other = Block::new(&g, View(1), ReplicaId(1), 8, QuorumCert::genesis()).unwrap();
+        let other = Block::new(&g, View(1), ReplicaId(1), Some(8), QuorumCert::genesis()).unwrap();
         assert_ne!(other.id, b1.id);
         let qc = qc_for(&b1, 3);
         qc.validate(&cfg).unwrap();
@@ -410,19 +417,30 @@ mod tests {
             qc_for(&b1, 2).validate(&cfg),
             Err(ConsensusError::InsufficientSigners { have: 2, need: 3 })
         );
-        let b2 = Block::new(&b1, View(2), ReplicaId(2), 0, qc).unwrap();
+        let b2 = Block::new(&b1, View(2), ReplicaId(2), None, qc).unwrap();
         assert_eq!(b2.parent, b1.id);
         assert_eq!(
-            Block::new(&b1, View(1), ReplicaId(1), 0, qc),
+            Block::new(&b1, View(1), ReplicaId(1), None, qc),
             Err(ConsensusError::NonIncreasingView)
         );
         assert_eq!(
-            Block::new(&b2, View(3), ReplicaId(3), 0, qc),
+            Block::new(&b2, View(3), ReplicaId(3), None, qc),
             Err(ConsensusError::QcMismatch)
         );
         let mut tampered = b2;
-        tampered.payload = 99;
+        tampered.payload = Some(99);
         assert!(!tampered.has_valid_id());
+    }
+
+    #[test]
+    fn empty_payload_is_distinct_from_command_zero() {
+        let g = Block::genesis();
+        let empty = Block::new(&g, View(1), ReplicaId(1), None, QuorumCert::genesis()).unwrap();
+        let zero = Block::new(&g, View(1), ReplicaId(1), Some(0), QuorumCert::genesis()).unwrap();
+        assert_ne!(empty.id, zero.id);
+        assert_eq!(empty.payload, None);
+        assert_eq!(zero.payload, Some(0));
+        assert!(empty.has_valid_id() && zero.has_valid_id());
     }
 
     #[test]

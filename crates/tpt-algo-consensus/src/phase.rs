@@ -71,7 +71,7 @@ pub trait Phase: sealed::Sealed + core::fmt::Debug + Copy {}
 /// }
 /// use tpt_algo_consensus::{Block, Config, Round};
 ///
-/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
 /// let round = Round::propose(&b1); // Round<Prepare>
 /// assert_eq!(round.block_id(), b1.id);
 /// # Ok(())
@@ -98,7 +98,7 @@ pub struct Prepare;
 /// use tpt_algo_consensus::{Block, Config, Round};
 ///
 /// let cfg = Config::new(4)?;
-/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
 /// // Prepare -> PreCommit once b1 is certified.
 /// let pre: Round<_> = Round::propose(&b1).certify(&cert(&b1), &cfg)?;
 /// assert_eq!(pre.view(), View(1));
@@ -126,8 +126,8 @@ pub struct PreCommit;
 /// use tpt_algo_consensus::{Block, Round};
 ///
 /// let cfg = Config::new(4)?;
-/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
-/// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
+/// let b2 = Block::new(&b1, View(2), ReplicaId(2), Some(11), cert(&b1))?;
 /// let commit = Round::propose(&b1).certify(&cert(&b1), &cfg)?.lock(&b2, &cert(&b2), &cfg)?;
 /// assert_eq!(commit.block_id(), b1.id);
 /// # Ok(())
@@ -154,9 +154,9 @@ pub struct Commit;
 /// use tpt_algo_consensus::{Block, Round};
 ///
 /// let cfg = Config::new(4)?;
-/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
-/// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
-/// let b3 = Block::new(&b2, View(3), ReplicaId(3), 12, cert(&b2))?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
+/// let b2 = Block::new(&b1, View(2), ReplicaId(2), Some(11), cert(&b1))?;
+/// let b3 = Block::new(&b2, View(3), ReplicaId(3), Some(12), cert(&b2))?;
 /// let decided = Round::propose(&b1)
 ///     .certify(&cert(&b1), &cfg)?
 ///     .lock(&b2, &cert(&b2), &cfg)?
@@ -196,7 +196,7 @@ impl Phase for Decide {}
 /// use tpt_algo_consensus::{Block, Round};
 ///
 /// let cfg = Config::new(4)?;
-/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+/// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
 /// let round = Round::propose(&b1).certify(&cert(&b1), &cfg)?;
 /// assert_eq!(round.height(), b1.height);
 /// # Ok(())
@@ -231,7 +231,7 @@ impl<P: Phase> Round<P> {
     /// }
     /// use tpt_algo_consensus::{Block, Round};
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// assert_eq!(Round::propose(&b1).block_id(), b1.id);
     /// # Ok(())
     /// # }
@@ -259,7 +259,7 @@ impl<P: Phase> Round<P> {
     /// }
     /// use tpt_algo_consensus::{Block, Round};
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// assert_eq!(Round::propose(&b1).view(), View(1));
     /// # Ok(())
     /// # }
@@ -287,7 +287,7 @@ impl<P: Phase> Round<P> {
     /// }
     /// use tpt_algo_consensus::{Block, Round};
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// assert_eq!(Round::propose(&b1).height(), 1);
     /// # Ok(())
     /// # }
@@ -315,7 +315,7 @@ impl<P: Phase> Round<P> {
     /// }
     /// use tpt_algo_consensus::{Block, Round};
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// // The tip is the most recent block the round has seen; right after proposal, that is b1.
     /// assert_eq!(Round::propose(&b1).tip(), b1.id);
     /// # Ok(())
@@ -389,7 +389,7 @@ impl Round<Prepare> {
     /// }
     /// use tpt_algo_consensus::{Block, Round};
     ///
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// let round = Round::propose(&b1);
     /// assert_eq!(round.block_id(), b1.id);
     /// # Ok(())
@@ -429,9 +429,9 @@ impl Round<Prepare> {
     /// use tpt_algo_consensus::{Block, Round};
     ///
     /// let cfg = Config::new(4)?;
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
     /// // A certificate for a different block is rejected.
-    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), Some(11), cert(&b1))?;
     /// assert!(Round::propose(&b1).certify(&cert(&b2), &cfg).is_err());
     /// # Ok(())
     /// # }
@@ -471,8 +471,8 @@ impl Round<PreCommit> {
     /// use tpt_algo_consensus::{Block, Round};
     ///
     /// let cfg = Config::new(4)?;
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
-    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
+    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), Some(11), cert(&b1))?;
     /// let pre = Round::propose(&b1).certify(&cert(&b1), &cfg)?;
     /// assert!(pre.lock(&b2, &cert(&b2), &cfg).is_ok());
     /// # Ok(())
@@ -513,9 +513,9 @@ impl Round<Commit> {
     /// use tpt_algo_consensus::{Block, Round};
     ///
     /// let cfg = Config::new(4)?;
-    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), 10, QuorumCert::genesis())?;
-    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), 11, cert(&b1))?;
-    /// let b3 = Block::new(&b2, View(3), ReplicaId(3), 12, cert(&b2))?;
+    /// let b1 = Block::new(&Block::genesis(), View(1), ReplicaId(1), Some(10), QuorumCert::genesis())?;
+    /// let b2 = Block::new(&b1, View(2), ReplicaId(2), Some(11), cert(&b1))?;
+    /// let b3 = Block::new(&b2, View(3), ReplicaId(3), Some(12), cert(&b2))?;
     /// let commit = Round::propose(&b1).certify(&cert(&b1), &cfg)?.lock(&b2, &cert(&b2), &cfg)?;
     /// assert!(commit.decide(&b3, &cert(&b3), &cfg).is_ok());
     /// # Ok(())
@@ -552,9 +552,9 @@ mod tests {
     fn three_chain_decides() {
         let cfg = Config::new(4).unwrap();
         let g = Block::genesis();
-        let b0 = Block::new(&g, View(1), ReplicaId(1), 0, QuorumCert::genesis()).unwrap();
-        let b1 = Block::new(&b0, View(2), ReplicaId(2), 0, qc(&b0)).unwrap();
-        let b2 = Block::new(&b1, View(3), ReplicaId(3), 0, qc(&b1)).unwrap();
+        let b0 = Block::new(&g, View(1), ReplicaId(1), None, QuorumCert::genesis()).unwrap();
+        let b1 = Block::new(&b0, View(2), ReplicaId(2), None, qc(&b0)).unwrap();
+        let b2 = Block::new(&b1, View(3), ReplicaId(3), None, qc(&b1)).unwrap();
         let r = Round::propose(&b0)
             .certify(&b1.justify, &cfg)
             .unwrap()
@@ -571,8 +571,8 @@ mod tests {
     fn gap_in_views_is_rejected() {
         let cfg = Config::new(4).unwrap();
         let g = Block::genesis();
-        let b0 = Block::new(&g, View(1), ReplicaId(1), 0, QuorumCert::genesis()).unwrap();
-        let b1 = Block::new(&b0, View(3), ReplicaId(3), 0, qc(&b0)).unwrap();
+        let b0 = Block::new(&g, View(1), ReplicaId(1), None, QuorumCert::genesis()).unwrap();
+        let b1 = Block::new(&b0, View(3), ReplicaId(3), None, qc(&b0)).unwrap();
         let pre = Round::propose(&b0).certify(&qc(&b0), &cfg).unwrap();
         assert_eq!(
             pre.lock(&b1, &qc(&b1), &cfg),

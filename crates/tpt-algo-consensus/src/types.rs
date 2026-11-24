@@ -173,8 +173,9 @@ impl SignerSet {
     /// ```
     #[must_use]
     pub fn len(&self) -> u16 {
-        let total: u32 = self.words.iter().map(|w| w.count_ones()).sum();
-        u16::try_from(total).unwrap_or(u16::MAX)
+        // At most 64 bits per word and MAX_REPLICAS (256) bits in total, so the
+        // sum cannot exceed u16::MAX.
+        self.words.iter().map(|w| w.count_ones() as u16).sum()
     }
 
     /// Whether the set is empty.
@@ -452,8 +453,10 @@ impl Config {
     /// ```
     #[must_use]
     pub fn leader(&self, view: View) -> ReplicaId {
+        // The remainder is below `n <= MAX_REPLICAS`, so it always fits in u16.
         let idx = view.0 % u64::from(self.n);
-        ReplicaId(u16::try_from(idx).unwrap_or(0))
+        debug_assert!(idx < u64::from(self.n));
+        ReplicaId(idx as u16)
     }
 
     /// View timeout after `consecutive_timeouts` views in a row ended by timeout.

@@ -47,4 +47,8 @@ pub enum FraudError {
         /// Column index.
         column: usize,
     },
+    /// A fitted tree referenced a node or feature that does not exist. The
+    /// inputs are validated first, so this indicates an internal bug.
+    #[error("internal tree invariant violated")]
+    CorruptTree,
 }

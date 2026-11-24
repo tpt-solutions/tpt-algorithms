@@ -644,7 +644,10 @@ impl Simulator {
                     &parent,
                     b.view,
                     b.proposer,
-                    b.payload ^ EQUIVOCATION_MASK,
+                    Some(
+                        b.payload
+                            .map_or(EQUIVOCATION_MASK, |p| p ^ EQUIVOCATION_MASK),
+                    ),
                     b.justify,
                 )
                 .ok()

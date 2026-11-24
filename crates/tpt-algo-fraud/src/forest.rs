@@ -24,37 +24,52 @@ struct Tree {
 }
 
 impl Tree {
-    fn build(rows: &[&[f64]], idx: &mut [usize], max_depth: usize, rng: &mut SplitMix64) -> Self {
+    fn build(
+        rows: &[&[f64]],
+        idx: &mut [usize],
+        max_depth: usize,
+        rng: &mut SplitMix64,
+    ) -> Result<Self, FraudError> {
         let mut nodes = Vec::new();
-        grow(rows, idx, 0, max_depth, rng, &mut nodes);
-        Self { nodes }
+        grow(rows, idx, 0, max_depth, rng, &mut nodes)?;
+        Ok(Self { nodes })
     }
 
-    fn path_length(&self, x: &[f64]) -> f64 {
+    /// Path length of `x`, including the leaf's `c(size)` adjustment.
+    ///
+    /// # Errors
+    /// [`FraudError::CorruptTree`] if a split refers to a feature missing from
+    /// `x` or to a node that does not exist. Callers validate `x` against the
+    /// forest dimension first, so this does not occur for a fitted forest.
+    fn path_length(&self, x: &[f64]) -> Result<f64, FraudError> {
         let mut at = 0usize;
         let mut depth = 0usize;
         loop {
-            match self.nodes.get(at) {
-                Some(Node::Split {
+            match self.nodes.get(at).ok_or(FraudError::CorruptTree)? {
+                Node::Split {
                     feature,
                     threshold,
                     left,
                     right,
-                }) => {
-                    at = if x.get(*feature).copied().unwrap_or(0.0) < *threshold {
-                        *left
-                    } else {
-                        *right
-                    };
+                } => {
+                    let v = x.get(*feature).copied().ok_or(FraudError::CorruptTree)?;
+                    at = if v < *threshold { *left } else { *right };
                     depth += 1;
                 }
-                Some(Node::Leaf { size }) => {
-                    return depth as f64 + average_path_length(*size);
+                Node::Leaf { size } => {
+                    return Ok(depth as f64 + average_path_length(*size));
                 }
-                None => return depth as f64,
             }
         }
     }
+}
+
+/// Value of feature `f` of training row `i`.
+fn cell(rows: &[&[f64]], i: usize, f: usize) -> Result<f64, FraudError> {
+    rows.get(i)
+        .and_then(|r| r.get(f))
+        .copied()
+        .ok_or(FraudError::CorruptTree)
 }
 
 /// Recursively grows a node over the points `idx`; returns its node index.
@@ -65,11 +80,11 @@ fn grow(
     max_depth: usize,
     rng: &mut SplitMix64,
     nodes: &mut Vec<Node>,
-) -> usize {
+) -> Result<usize, FraudError> {
     let me = nodes.len();
     nodes.push(Node::Leaf { size: idx.len() });
     if depth >= max_depth || idx.len() <= 1 {
-        return me;
+        return Ok(me);
     }
     let dim = rows.first().map_or(0, |r| r.len());
     // Pick a random feature; if it is constant here, scan onward cyclically.
@@ -79,7 +94,7 @@ fn grow(
         let f = (start + off) % dim;
         let (mut lo, mut hi) = (f64::INFINITY, f64::NEG_INFINITY);
         for &i in idx.iter() {
-            let v = rows.get(i).and_then(|r| r.get(f)).copied().unwrap_or(0.0);
+            let v = cell(rows, i, f)?;
             lo = lo.min(v);
             hi = hi.max(v);
         }
@@ -88,8 +103,9 @@ fn grow(
             break;
         }
     }
+    // Every feature constant on these points: the node stays a leaf.
     let Some((feature, lo, hi)) = chosen else {
-        return me;
+        return Ok(me);
     };
     let mut threshold = lo + rng.next_f64() * (hi - lo);
     if threshold <= lo {
@@ -98,32 +114,26 @@ fn grow(
     // Partition: values < threshold first.
     let mut split = 0usize;
     for k in 0..idx.len() {
-        let v = idx
-            .get(k)
-            .and_then(|&i| rows.get(i))
-            .and_then(|r| r.get(feature))
-            .copied()
-            .unwrap_or(0.0);
-        if v < threshold {
+        let i = idx.get(k).copied().ok_or(FraudError::CorruptTree)?;
+        if cell(rows, i, feature)? < threshold {
             idx.swap(k, split);
             split += 1;
         }
     }
-    if split == 0 || split == idx.len() {
-        return me;
-    }
+    // Since lo < threshold < hi, the minimum goes left and the maximum goes
+    // right, so both sides are non-empty.
+    debug_assert!(split > 0 && split < idx.len(), "split must be non-trivial");
     let (l, r) = idx.split_at_mut(split);
-    let left = grow(rows, l, depth + 1, max_depth, rng, nodes);
-    let right = grow(rows, r, depth + 1, max_depth, rng, nodes);
-    if let Some(n) = nodes.get_mut(me) {
-        *n = Node::Split {
-            feature,
-            threshold,
-            left,
-            right,
-        };
-    }
-    me
+    let left = grow(rows, l, depth + 1, max_depth, rng, nodes)?;
+    let right = grow(rows, r, depth + 1, max_depth, rng, nodes)?;
+    let slot = nodes.get_mut(me).ok_or(FraudError::CorruptTree)?;
+    *slot = Node::Split {
+        feature,
+        threshold,
+        left,
+        right,
+    };
+    Ok(me)
 }
 
 /// A fitted Isolation Forest.
@@ -190,7 +200,7 @@ impl IsolationForest {
                 pool.swap(k, j);
             }
             let mut sample: Vec<usize> = pool.iter().take(psi).copied().collect();
-            trees.push(Tree::build(&rows, &mut sample, max_depth, &mut rng));
+            trees.push(Tree::build(&rows, &mut sample, max_depth, &mut rng)?);
         }
         Ok(Self { trees, dim, psi })
     }
@@ -261,7 +271,10 @@ impl IsolationForest {
         if let Some(column) = x.iter().position(|v| !v.is_finite()) {
             return Err(FraudError::NonFinite { row: 0, column });
         }
-        let total: f64 = self.trees.iter().map(|t| t.path_length(x)).sum();
+        let mut total = 0.0;
+        for t in &self.trees {
+            total += t.path_length(x)?;
+        }
         Ok(total / self.trees.len() as f64)
     }
 
@@ -423,6 +436,38 @@ mod tests {
         let sa = a.score_samples(&grid()).unwrap();
         assert_eq!(sa, b.score_samples(&grid()).unwrap());
         assert_ne!(sa, c.score_samples(&grid()).unwrap());
+    }
+
+    #[test]
+    fn path_length_errors_on_short_input_instead_of_defaulting() {
+        // A tree split on feature 1 must not treat a missing feature as 0.0.
+        let tree = Tree {
+            nodes: vec![
+                Node::Split {
+                    feature: 1,
+                    threshold: 0.5,
+                    left: 1,
+                    right: 2,
+                },
+                Node::Leaf { size: 1 },
+                Node::Leaf { size: 1 },
+            ],
+        };
+        assert_eq!(tree.path_length(&[0.0]), Err(FraudError::CorruptTree));
+        assert!(tree.path_length(&[0.0, 0.2]).is_ok());
+    }
+
+    #[test]
+    fn path_length_errors_on_dangling_node() {
+        let tree = Tree {
+            nodes: vec![Node::Split {
+                feature: 0,
+                threshold: 0.5,
+                left: 7,
+                right: 8,
+            }],
+        };
+        assert_eq!(tree.path_length(&[0.0]), Err(FraudError::CorruptTree));
     }
 
     #[test]

@@ -42,6 +42,7 @@ mod config;
 mod error;
 #[cfg(feature = "alloc")]
 mod forest;
+#[cfg(feature = "alloc")]
 mod rng;
 
 pub use config::IsolationForestConfig;
