@@ -8,6 +8,16 @@ While the version is `0.x`, minor releases may contain breaking changes.
 
 ## [Unreleased]
 
+## [0.0.2](https://github.com/tpt-solutions/tpt-algorithms/compare/tpt-algo-cli-v0.0.1...tpt-algo-cli-v0.0.2) - 2026-11-24
+
+### Added
+
+- *(cli)* add the tpt command-line tool
+
+### Other
+
+- *(cli)* align tpt-algo-cli path dependencies with workspace 0.0.1
+
 ### Added
 
 - `tpt` binary with subcommands `soc`, `fraud` (with `explain`), `orderbook`,

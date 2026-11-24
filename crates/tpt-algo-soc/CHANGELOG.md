@@ -8,6 +8,18 @@ While the version is `0.x`, minor releases may contain breaking changes.
 
 ## [Unreleased]
 
+## [0.0.2](https://github.com/tpt-solutions/tpt-algorithms/compare/tpt-algo-soc-v0.0.1...tpt-algo-soc-v0.0.2) - 2026-11-24
+
+### Fixed
+
+- remove silent fallbacks and stubs from library code
+
+### Other
+
+- Merge branch 'master' of https://github.com/tpt-solutions/tpt-algorithms
+- update READMEs, CHANGELOGs and dev tooling for phases 19-23
+- add validation suites and fixtures for soc, swarm and consensus
+
 ## [0.0.1](https://github.com/tpt-solutions/tpt-algorithms/compare/tpt-algo-soc-v0.0.0...tpt-algo-soc-v0.0.1) - 2026-11-23
 
 ### Other
