@@ -14,9 +14,39 @@ publish = false
 criterion.workspace = true
 tpt-algo-math-core.workspace = true
 tpt-algo-synth-data.workspace = true
+tpt-algo-soc = { path = "../crates/tpt-algo-soc" }
+tpt-algo-fraud = { path = "../crates/tpt-algo-fraud" }
+tpt-algo-orderbook = { path = "../crates/tpt-algo-orderbook" }
+tpt-algo-routing = { path = "../crates/tpt-algo-routing" }
+tpt-algo-swarm = { path = "../crates/tpt-algo-swarm" }
+tpt-algo-consensus = { path = "../crates/tpt-algo-consensus" }
 
 [[bench]]
 name = "primitives"
+harness = false
+
+[[bench]]
+name = "soc"
+harness = false
+
+[[bench]]
+name = "fraud"
+harness = false
+
+[[bench]]
+name = "orderbook"
+harness = false
+
+[[bench]]
+name = "routing"
+harness = false
+
+[[bench]]
+name = "swarm"
+harness = false
+
+[[bench]]
+name = "consensus"
 harness = false
 
 [lints]

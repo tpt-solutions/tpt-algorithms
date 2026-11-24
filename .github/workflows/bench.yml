@@ -1,0 +1,36 @@
+name: Bench
+
+# Scheduled Criterion run for the per-crate benchmarks in benches/.
+# Numbers are machine-specific: they come from the GitHub runner below and are
+# only comparable across runs on the same runner image. See benches/README.md.
+
+on:
+  schedule:
+    - cron: "0 3 * * 0" # Sundays 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  bench:
+    name: criterion (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run benchmark suite
+        run: cargo bench -p tpt-algo-benches
+      - name: Upload Criterion output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: criterion-${{ github.sha }}
+          path: target/criterion/
+          if-no-files-found: warn
+          retention-days: 90
