@@ -1,0 +1,32 @@
+[package]
+name = "tpt-algo-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Command-line front end (`tpt`) for the tpt-algorithms crates: CSV/JSON in, JSON/CSV out, record and replay"
+readme = "README.md"
+keywords = ["cli", "anomaly-detection", "kalman-filter", "routing", "consensus"]
+categories = ["command-line-utilities", "algorithms", "science"]
+
+[[bin]]
+name = "tpt"
+path = "src/main.rs"
+
+[dependencies]
+# Path dependencies only; no third-party crates. The JSON and CSV handling is hand-rolled.
+tpt-algo-consensus = { path = "../tpt-algo-consensus", version = "0.0.0" }
+tpt-algo-fraud = { path = "../tpt-algo-fraud", version = "0.0.0" }
+tpt-algo-orderbook = { path = "../tpt-algo-orderbook", version = "0.0.0" }
+tpt-algo-routing = { path = "../tpt-algo-routing", version = "0.0.0" }
+tpt-algo-soc = { path = "../tpt-algo-soc", version = "0.0.0" }
+tpt-algo-swarm = { path = "../tpt-algo-swarm", version = "0.0.0" }
+
+[dev-dependencies]
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

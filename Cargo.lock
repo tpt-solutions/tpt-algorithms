@@ -660,7 +660,13 @@ name = "tpt-algo-benches"
 version = "0.0.0"
 dependencies = [
  "criterion",
+ "tpt-algo-consensus",
+ "tpt-algo-fraud",
  "tpt-algo-math-core",
+ "tpt-algo-orderbook",
+ "tpt-algo-routing",
+ "tpt-algo-soc",
+ "tpt-algo-swarm",
  "tpt-algo-synth-data",
 ]
 
@@ -668,8 +674,25 @@ dependencies = [
 name = "tpt-algo-bindings-core"
 version = "0.0.0"
 dependencies = [
+ "serde_json",
+ "tpt-algo-consensus",
  "tpt-algo-fraud",
+ "tpt-algo-orderbook",
+ "tpt-algo-routing",
  "tpt-algo-soc",
+ "tpt-algo-swarm",
+]
+
+[[package]]
+name = "tpt-algo-cli"
+version = "0.0.0"
+dependencies = [
+ "tpt-algo-consensus",
+ "tpt-algo-fraud",
+ "tpt-algo-orderbook",
+ "tpt-algo-routing",
+ "tpt-algo-soc",
+ "tpt-algo-swarm",
 ]
 
 [[package]]

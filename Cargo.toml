@@ -12,6 +12,7 @@ members = [
     "crates/tpt-algo-routing",
     "crates/tpt-algo-swarm",
     "crates/tpt-algo-consensus",
+    "crates/tpt-algo-cli",
 ]
 # Binding crates are standalone builds (maturin / wasm-pack), see docs/bindings.md.
 exclude = ["crates/tpt-algo-py", "crates/tpt-algo-wasm"]

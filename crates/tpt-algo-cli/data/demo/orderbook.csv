@@ -1,0 +1,14 @@
+op,id,side,price,qty,new_qty,new_price
+add,1,bid,99,100,,
+add,2,bid,98,200,,
+add,3,ask,101,150,,
+add,4,ask,102,80,,
+add,5,ask,101,50,,
+cancel,2,,,,,
+modify,4,,,,60,
+execute_order,3,,,120,,
+add,6,bid,101,40,,
+execute,1,bid,,30,,
+add,7,ask,99,25,,
+modify,5,,,,,100
+execute_order,4,,,10,,
