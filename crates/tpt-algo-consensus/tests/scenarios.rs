@@ -8,7 +8,7 @@ use tpt_algo_consensus::sim::{
 use tpt_algo_consensus::{Block, ConsensusError, QuorumCert, ReplicaId, SignerSet, View};
 
 /// The chain an honest, fault-free 4-replica group must build with unit
-/// delays: one block per view, proposed by `v mod 4`, payload 0, each
+/// delays: one block per view, proposed by `v mod 4`, empty payload, each
 /// justified by a QC for its parent. The QC for view `p` is formed by the
 /// leader of `p + 1` from the first three votes it receives: its own, the
 /// proposer of `p` (whose vote arrives one tick earlier) and, among the
@@ -38,7 +38,7 @@ fn expected_chain(views: u64) -> Result<Vec<Block>, ConsensusError> {
             }
         };
         let proposer = ReplicaId((v % 4) as u16);
-        let b = Block::new(&parent, View(v), proposer, 0, justify)?;
+        let b = Block::new(&parent, View(v), proposer, None, justify)?;
         chain.push(b);
         parent = b;
     }
@@ -256,7 +256,7 @@ fn simulator_rejects_bad_parameters() {
 fn prefix_checker_detects_conflicts() {
     let chain = expected_chain(3).unwrap();
     let g = Block::genesis();
-    let fork = Block::new(&g, View(2), ReplicaId(2), 9, QuorumCert::genesis()).unwrap();
+    let fork = Block::new(&g, View(2), ReplicaId(2), Some(9), QuorumCert::genesis()).unwrap();
     let logs = vec![(ReplicaId(0), chain.clone()), (ReplicaId(1), vec![fork])];
     assert_eq!(
         check_prefix_consistency(&logs),

@@ -1,0 +1,26 @@
+# Hand-derived HotStuff commit traces (4 replicas, unit delays, no drops, no faults).
+#
+# Derivation (same model as tests/scenarios.rs, known_answer_four_replicas_no_faults):
+#   - View v is proposed at tick 2v - 2 by leader v mod 4.
+#   - Its quorum certificate forms at tick 2v (the votes arrive one tick after
+#     the proposal, and the next leader collects the quorum).
+#   - Three-chain rule: block k (view k) commits once QC(b_{k+2}) is seen.
+#     QC(b_{k+2}) is seen at tick 2(k+2) = 2k+4 by the leader of view k+3, and
+#     one tick later (2k+5) by every other replica.
+#   - Replica 0 leads view k+3 exactly when (k+3) mod 4 == 0.
+#   So replica 0 commits block k at tick c(k) = 2k+4 if (k+3) mod 4 == 0,
+#   otherwise c(k) = 2k+5:
+#     c(1)=6, c(2)=9, c(3)=11, c(4)=13, c(5)=14, c(6)=17, c(7)=19, c(8)=21.
+#   The committed views after running T ticks are { k : c(k) <= T }.
+#
+# Columns: n seed ticks committed-views-of-replica-0 ("-" = none)
+4 1 5 -
+4 1 6 1
+4 1 9 1,2
+4 1 11 1,2,3
+4 1 13 1,2,3,4
+4 1 14 1,2,3,4,5
+4 1 17 1,2,3,4,5,6
+4 1 19 1,2,3,4,5,6,7
+4 1 20 1,2,3,4,5,6,7
+4 1 21 1,2,3,4,5,6,7,8
