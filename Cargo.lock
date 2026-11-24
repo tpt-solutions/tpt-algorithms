@@ -685,7 +685,7 @@ dependencies = [
 
 [[package]]
 name = "tpt-algo-cli"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "tpt-algo-consensus",
  "tpt-algo-fraud",
