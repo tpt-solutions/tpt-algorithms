@@ -150,6 +150,26 @@ Dataset-based checks live in `tests/validation.rs`. They are `#[ignore]`d, need
   Determination of Minimum Cost Paths*, IEEE Transactions on Systems Science and
   Cybernetics, 1968.
 
+## Benchmarks
+
+Criterion benchmarks for this crate live in [`benches/benches/swarm.rs`](../../benches/benches/swarm.rs)
+(the `tpt-algo-benches` package). Inputs come from `tpt-algo-synth-data` where the crate takes
+generated data.
+
+Numbers are produced by the scheduled bench workflow
+(`.github/workflows/bench.yml`, weekly plus on demand) on a GitHub-hosted `ubuntu-latest`
+runner, and uploaded as the `criterion-<sha>` artifact. They are not measured on a developer
+machine and are not portable between runners.
+
+| Benchmark | Measures | Median time |
+|-----------|----------|-------------|
+| `swarm_simulation/10` | 100 steps of avoidance for 10 agents | pending first scheduled run |
+| `swarm_simulation/50` | 100 steps of avoidance for 50 agents | pending first scheduled run |
+| `swarm_find_path_128x128` | Grid A* (eight-connected) across a 128 x 128 wall with one gap | pending first scheduled run |
+
+To run locally: `cargo bench -p tpt-algo-benches --bench swarm`. Criterion writes reports to
+`target/criterion/`.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

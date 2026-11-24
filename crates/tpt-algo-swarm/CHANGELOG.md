@@ -23,3 +23,9 @@ While the version is `0.x`, minor releases may contain breaking changes.
 - `serde` feature for `Vec2`, `Agent`, `AvoidanceConfig` and `Responsibility`.
 - `crossing` example.
 - docs.rs metadata (all features, `docsrs` cfg).
+
+### Documentation
+
+- README "Benchmarks" section listing the Criterion benchmarks in
+  `benches/benches/swarm.rs`, with the scheduled bench workflow as the
+  source of published numbers.

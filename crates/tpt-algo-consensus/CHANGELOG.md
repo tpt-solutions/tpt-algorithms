@@ -27,3 +27,8 @@ While the version is `0.x`, minor releases may contain breaking changes.
 - `serde` feature for ids, views, signer sets, blocks, QCs and messages.
 - `simulate` example.
 
+### Documentation
+
+- README "Benchmarks" section listing the Criterion benchmarks in
+  `benches/benches/consensus.rs`, with the scheduled bench workflow as the
+  source of published numbers.

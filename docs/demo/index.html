@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>tpt-algo browser demo</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --bg: #fbfbfa;
+      --fg: #1d1d1b;
+      --muted: #6b6b66;
+      --panel: #ffffff;
+      --border: #d9d9d4;
+      --accent: #2b6cb0;
+      --accent-2: #c05621;
+      --error: #b42318;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #161615;
+        --fg: #ececE8;
+        --muted: #9a9a94;
+        --panel: #1f1f1d;
+        --border: #3a3a36;
+        --accent: #7fb2ea;
+        --accent-2: #f0a073;
+        --error: #ff8a80;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #161615;
+      --fg: #ececE8;
+      --muted: #9a9a94;
+      --panel: #1f1f1d;
+      --border: #3a3a36;
+      --accent: #7fb2ea;
+      --accent-2: #f0a073;
+      --error: #ff8a80;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    h2 { font-size: 1.2rem; margin: 0 0 8px; }
+    p.lead, .muted { color: var(--muted); margin: 4px 0 12px; }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 8px 0 12px; }
+    label { display: flex; flex-direction: column; font-size: 0.9rem; color: var(--muted); gap: 4px; }
+    input[type="number"] {
+      width: 110px;
+      padding: 6px 8px;
+      font: inherit;
+      color: var(--fg);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    button {
+      padding: 7px 14px;
+      font: inherit;
+      color: #fff;
+      background: var(--accent);
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.08); }
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      touch-action: manipulation;
+    }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-top: 12px; }
+    .stat { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+    .stat b { display: block; font-size: 1.15rem; }
+    .stat span { color: var(--muted); font-size: 0.85rem; }
+    .legend { font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+    .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 10px; vertical-align: middle; }
+    #status { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); }
+    #status.error { color: var(--error); border-color: var(--error); }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>tpt-algo in the browser</h1>
+  <p class="lead">Two of the crates compiled to WebAssembly and run here, in your browser. Everything runs locally:
+    no data leaves the page. Both demos use seeded synthetic data, so a given seed always gives the same result.</p>
+
+  <div id="status">Loading WebAssembly module…</div>
+
+  <section id="fraud-section" hidden>
+    <h2>Anomaly scoring: Isolation Forest (<code>tpt-algo-fraud</code>)</h2>
+    <p class="muted">A forest is trained on 400 normal points around the origin plus 12 outliers in the upper right.
+      Each point is coloured by its anomaly score (blue = normal, orange = anomalous). Click the plot to score any point.</p>
+    <div class="controls">
+      <label>Seed <input id="fraud-seed" type="number" value="7" min="0" step="1"></label>
+      <label>Trees <input id="fraud-trees" type="number" value="100" min="1" step="1"></label>
+      <button id="fraud-run" type="button">Train again</button>
+    </div>
+    <canvas id="fraud-canvas" width="640" height="480" aria-label="Scatter plot of points coloured by anomaly score"></canvas>
+    <div class="legend">
+      <span class="swatch" style="background:#2b6cb0"></span>low score
+      <span class="swatch" style="background:#f0f0ee;border:1px solid var(--border)"></span>mid
+      <span class="swatch" style="background:#c05621"></span>high score
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="fraud-inlier">–</b><span>mean score, normal points</span></div>
+      <div class="stat"><b id="fraud-outlier">–</b><span>mean score, outliers</span></div>
+      <div class="stat"><b id="fraud-clicked">–</b><span>score at last click</span></div>
+    </div>
+  </section>
+
+  <section id="soc-section" hidden>
+    <h2>Battery state of charge: Extended Kalman filter (<code>tpt-algo-soc</code>)</h2>
+    <p class="muted">A simulated cell starts at 90% state of charge and discharges at 1 A for 50 minutes. The
+      filter is told it starts at 50%, so it has to converge from a wrong guess. Voltage readings carry noise.
+      The first reading pulls the estimate up sharply, past the truth, and then it settles onto the true curve.
+      The simulated cell has a slightly higher series resistance (0.06 Ω) than the filter assumes (0.05 Ω).</p>
+    <div class="controls">
+      <label>Seed <input id="soc-seed" type="number" value="1" min="0" step="1"></label>
+      <label>Voltage noise (V) <input id="soc-noise" type="number" value="0.005" min="0" step="0.001"></label>
+      <button id="soc-run" type="button">Run again</button>
+    </div>
+    <canvas id="soc-canvas" width="640" height="360" aria-label="Line chart of true and estimated state of charge"></canvas>
+    <div class="legend">
+      <span class="swatch" style="background:#6b6b66"></span>true state of charge
+      <span class="swatch" style="background:#c05621"></span>filter estimate
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="soc-final-true">–</b><span>true state of charge at end</span></div>
+      <div class="stat"><b id="soc-final-est">–</b><span>estimate at end</span></div>
+      <div class="stat"><b id="soc-rmse">–</b><span>RMSE over the run (state of charge)</span></div>
+    </div>
+  </section>
+</main>
+<script type="module" src="demo.js"></script>
+</body>
+</html>

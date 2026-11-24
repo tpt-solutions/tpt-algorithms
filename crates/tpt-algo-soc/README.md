@@ -114,6 +114,25 @@ cargo run -p tpt-algo-soc --example discharge
 - Dataset: NASA Prognostics Center of Excellence, Battery Data Set. Check the
   source page's terms before publishing a workflow that uses it.
 
+## Benchmarks
+
+Criterion benchmarks for this crate live in [`benches/benches/soc.rs`](../../benches/benches/soc.rs)
+(the `tpt-algo-benches` package). Inputs come from `tpt-algo-synth-data` where the crate takes
+generated data.
+
+Numbers are produced by the scheduled bench workflow
+(`.github/workflows/bench.yml`, weekly plus on demand) on a GitHub-hosted `ubuntu-latest`
+runner, and uploaded as the `criterion-<sha>` artifact. They are not measured on a developer
+machine and are not portable between runners.
+
+| Benchmark | Measures | Median time |
+|-----------|----------|-------------|
+| `soc_ekf/500` | 500 one-second steps of the EKF (predict + update) | pending first scheduled run |
+| `soc_ekf/2000` | 2,000 one-second steps of the EKF (predict + update) | pending first scheduled run |
+
+To run locally: `cargo bench -p tpt-algo-benches --bench soc`. Criterion writes reports to
+`target/criterion/`.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

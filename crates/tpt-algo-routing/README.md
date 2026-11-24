@@ -126,6 +126,29 @@ cargo run -p tpt-algo-routing --example basic
 - P. Toth, D. Vigo (eds.), *Vehicle Routing: Problems, Methods, and Applications*,
   SIAM, 2nd ed., 2014.
 
+## Benchmarks
+
+Criterion benchmarks for this crate live in [`benches/benches/routing.rs`](../../benches/benches/routing.rs)
+(the `tpt-algo-benches` package). Inputs come from `tpt-algo-synth-data` where the crate takes
+generated data.
+
+Numbers are produced by the scheduled bench workflow
+(`.github/workflows/bench.yml`, weekly plus on demand) on a GitHub-hosted `ubuntu-latest`
+runner, and uploaded as the `criterion-<sha>` artifact. They are not measured on a developer
+machine and are not portable between runners.
+
+| Benchmark | Measures | Median time |
+|-----------|----------|-------------|
+| `routing_clarke_wright/50` | Clarke-Wright savings, 50 customers | pending first scheduled run |
+| `routing_clarke_wright/200` | Clarke-Wright savings, 200 customers | pending first scheduled run |
+| `routing_clarke_wright/500` | Clarke-Wright savings, 500 customers | pending first scheduled run |
+| `routing_solve/50` | Full `solve` (savings + local search), 50 customers | pending first scheduled run |
+| `routing_solve/200` | Full `solve` (savings + local search), 200 customers | pending first scheduled run |
+| `routing_solve/500` | Full `solve` (savings + local search), 500 customers | pending first scheduled run |
+
+To run locally: `cargo bench -p tpt-algo-benches --bench routing`. Criterion writes reports to
+`target/criterion/`.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

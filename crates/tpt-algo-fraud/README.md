@@ -114,6 +114,25 @@ cargo run -p tpt-algo-fraud --example basic
 - F. T. Liu, K. M. Ting, Z.-H. Zhou, *Isolation-Based Anomaly Detection*, ACM
   Transactions on Knowledge Discovery from Data, 2012.
 
+## Benchmarks
+
+Criterion benchmarks for this crate live in [`benches/benches/fraud.rs`](../../benches/benches/fraud.rs)
+(the `tpt-algo-benches` package). Inputs come from `tpt-algo-synth-data` where the crate takes
+generated data.
+
+Numbers are produced by the scheduled bench workflow
+(`.github/workflows/bench.yml`, weekly plus on demand) on a GitHub-hosted `ubuntu-latest`
+runner, and uploaded as the `criterion-<sha>` artifact. They are not measured on a developer
+machine and are not portable between runners.
+
+| Benchmark | Measures | Median time |
+|-----------|----------|-------------|
+| `fraud_fit/100_trees_5k_rows` | Fit 100 trees on 5,000 synthetic log-amount rows | pending first scheduled run |
+| `fraud_score/score_samples_5k_rows` | Score 5,000 rows with a fitted 100-tree forest | pending first scheduled run |
+
+To run locally: `cargo bench -p tpt-algo-benches --bench fraud`. Criterion writes reports to
+`target/criterion/`.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

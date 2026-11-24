@@ -141,6 +141,25 @@ cargo run -p tpt-algo-orderbook --example basic
 - LOBSTER (Limit Order Book System, the Efficient Reconstructor), for the
   planned validation data.
 
+## Benchmarks
+
+Criterion benchmarks for this crate live in [`benches/benches/orderbook.rs`](../../benches/benches/orderbook.rs)
+(the `tpt-algo-benches` package). Inputs come from `tpt-algo-synth-data` where the crate takes
+generated data.
+
+Numbers are produced by the scheduled bench workflow
+(`.github/workflows/bench.yml`, weekly plus on demand) on a GitHub-hosted `ubuntu-latest`
+runner, and uploaded as the `criterion-<sha>` artifact. They are not measured on a developer
+machine and are not portable between runners.
+
+| Benchmark | Measures | Median time |
+|-----------|----------|-------------|
+| `orderbook_apply/10000` | Apply 10,000 events (adds and crossing market orders) | pending first scheduled run |
+| `orderbook_apply/100000` | Apply 100,000 events (adds and crossing market orders) | pending first scheduled run |
+
+To run locally: `cargo bench -p tpt-algo-benches --bench orderbook`. Criterion writes reports to
+`target/criterion/`.
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).

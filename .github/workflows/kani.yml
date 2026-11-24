@@ -37,7 +37,7 @@ jobs:
           - verification::non_finite_input_is_rejected
           - verification::bounded_inputs_give_finite_position
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run one Kani harness
         uses: model-checking/kani-github-action@v1.1
         with:

@@ -26,7 +26,7 @@ clean.
 7. **Datasets** are fetched only on demand, never committed, and their terms are checked before
    any workflow is documented. See [datasets.md](datasets.md).
 
-## Review checklist (for every algorithm PR)
+## Review checklist (for every algorithm change)
 
 - [ ] Clean-room notes and provenance entry exist and are current.
 - [ ] No code was copied from a non-permissive source (check the PR description for the source
