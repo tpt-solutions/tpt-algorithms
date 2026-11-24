@@ -15,12 +15,12 @@ path = "src/main.rs"
 
 [dependencies]
 # Path dependencies only; no third-party crates. The JSON and CSV handling is hand-rolled.
-tpt-algo-consensus = { path = "../tpt-algo-consensus", version = "0.0.1" }
-tpt-algo-fraud = { path = "../tpt-algo-fraud", version = "0.0.1" }
-tpt-algo-orderbook = { path = "../tpt-algo-orderbook", version = "0.0.1" }
-tpt-algo-routing = { path = "../tpt-algo-routing", version = "0.0.1" }
-tpt-algo-soc = { path = "../tpt-algo-soc", version = "0.0.1" }
-tpt-algo-swarm = { path = "../tpt-algo-swarm", version = "0.0.1" }
+tpt-algo-consensus = { path = "../tpt-algo-consensus", version = "0.0.2" }
+tpt-algo-fraud = { path = "../tpt-algo-fraud", version = "0.0.2" }
+tpt-algo-orderbook = { path = "../tpt-algo-orderbook", version = "0.0.2" }
+tpt-algo-routing = { path = "../tpt-algo-routing", version = "0.0.2" }
+tpt-algo-soc = { path = "../tpt-algo-soc", version = "0.0.2" }
+tpt-algo-swarm = { path = "../tpt-algo-swarm", version = "0.0.2" }
 
 [dev-dependencies]
 
