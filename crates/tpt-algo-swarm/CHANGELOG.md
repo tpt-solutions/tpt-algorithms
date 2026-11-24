@@ -8,6 +8,25 @@ While the version is `0.x`, minor releases may contain breaking changes.
 
 ## [Unreleased]
 
+## [0.0.1](https://github.com/tpt-solutions/tpt-algorithms/compare/tpt-algo-swarm-v0.0.0...tpt-algo-swarm-v0.0.1) - 2026-11-23
+
+### Other
+
+- release
+
+## [0.0.0](https://github.com/tpt-solutions/tpt-algorithms/releases/tag/tpt-algo-swarm-v0.0.0) - 2026-11-23
+
+### Fixed
+
+- *(fraud,swarm,orderbook)* test imports, swarm avoidance and docs
+
+### Other
+
+- *(swarm)* crates.io metadata, README rewrite and CHANGELOG
+- *(swarm)* add runnable doctests and align README sections
+- pin LF line endings and add docs.rs metadata for public crates
+- Add tpt-algo-swarm crate
+
 ### Added
 
 - `VelocityObstacle`: truncated-cone velocity obstacle between two disc-shaped
