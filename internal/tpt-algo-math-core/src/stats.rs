@@ -79,17 +79,13 @@ pub fn quantile(xs: &[f64], q: f64) -> Result<f64, MathError> {
     sorted.sort_by(f64::total_cmp);
     let n = sorted.len();
     let pos = q * (n - 1) as f64;
-    let lo = floor_index(pos);
+    // `pos` is always >= 0 here; truncation equals floor for non-negative values.
+    let lo = pos as usize;
     let hi = if lo + 1 < n { lo + 1 } else { lo };
     let frac = pos - lo as f64;
     let a = sorted.get(lo).copied().ok_or(MathError::InsufficientData)?;
     let b = sorted.get(hi).copied().ok_or(MathError::InsufficientData)?;
     Ok(a + (b - a) * frac)
-}
-
-fn floor_index(pos: f64) -> usize {
-    // `pos` is always >= 0 here; truncation equals floor for non-negative values.
-    pos as usize
 }
 
 #[cfg(test)]
