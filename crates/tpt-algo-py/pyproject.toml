@@ -5,16 +5,21 @@ build-backend = "maturin"
 [project]
 name = "tpt-algo"
 version = "0.0.0"
-description = "Python bindings for tpt-algo-fraud (Isolation Forest) and tpt-algo-soc (battery state-of-charge EKF)."
+description = "Python bindings for the tpt-algo crates: Isolation Forest, battery EKF, routing, order book, swarm avoidance and a consensus simulator."
 requires-python = ">=3.10"
 license = { text = "MIT OR Apache-2.0" }
 readme = "README.md"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: 3",
+    "Typing :: Typed",
     "Topic :: Scientific/Engineering",
 ]
 
 [tool.maturin]
-module-name = "tpt_algo"
+# The Rust extension is imported as tpt_algo._native; the typed public API is
+# the pure-Python package in python/tpt_algo (with py.typed and a .pyi stub).
+module-name = "tpt_algo._native"
+python-source = "python"
 features = ["extension-module"]
+include = ["python/tpt_algo/py.typed", "python/tpt_algo/*.pyi"]

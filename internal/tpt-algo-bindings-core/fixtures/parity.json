@@ -1,0 +1,2896 @@
+{
+ "version": 1,
+ "cases": [
+  {
+   "name": "forest_explicit",
+   "kind": "forest",
+   "input": {
+    "data": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.1,
+      0.1
+     ],
+     [
+      0.2,
+      0.2
+     ],
+     [
+      0.3,
+      0.3
+     ],
+     [
+      0.4,
+      0.4
+     ],
+     [
+      0.5,
+      0.5
+     ],
+     [
+      0.6,
+      0.6
+     ],
+     [
+      0.7,
+      0.0
+     ],
+     [
+      0.8,
+      0.1
+     ],
+     [
+      0.9,
+      0.2
+     ],
+     [
+      0.0,
+      0.3
+     ],
+     [
+      0.1,
+      0.4
+     ],
+     [
+      0.2,
+      0.5
+     ],
+     [
+      0.3,
+      0.6
+     ],
+     [
+      0.4,
+      0.0
+     ],
+     [
+      0.5,
+      0.1
+     ],
+     [
+      0.6,
+      0.2
+     ],
+     [
+      0.7,
+      0.3
+     ],
+     [
+      0.8,
+      0.4
+     ],
+     [
+      0.9,
+      0.5
+     ],
+     [
+      0.0,
+      0.6
+     ],
+     [
+      0.1,
+      0.0
+     ],
+     [
+      0.2,
+      0.1
+     ],
+     [
+      0.3,
+      0.2
+     ],
+     [
+      0.4,
+      0.3
+     ],
+     [
+      0.5,
+      0.4
+     ],
+     [
+      0.6,
+      0.5
+     ],
+     [
+      0.7,
+      0.6
+     ],
+     [
+      0.8,
+      0.0
+     ],
+     [
+      0.9,
+      0.1
+     ],
+     [
+      50.0,
+      50.0
+     ]
+    ],
+    "n_trees": 50,
+    "subsample_size": 64,
+    "seed": 7,
+    "queries": [
+     [
+      0.3,
+      0.3
+     ],
+     [
+      50.0,
+      50.0
+     ]
+    ]
+   },
+   "expected": {
+    "dimension": 2,
+    "mean_path_length": [
+     7.511690676831281,
+     1.0
+    ],
+    "n_trees": 50,
+    "scores": [
+     0.42117420821236046,
+     0.8912635878306596
+    ]
+   }
+  },
+  {
+   "name": "forest_defaults",
+   "kind": "forest",
+   "input": {
+    "data": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.1,
+      0.1
+     ],
+     [
+      0.2,
+      0.2
+     ],
+     [
+      0.3,
+      0.3
+     ],
+     [
+      0.4,
+      0.4
+     ],
+     [
+      0.5,
+      0.5
+     ],
+     [
+      0.6,
+      0.6
+     ],
+     [
+      0.7,
+      0.0
+     ],
+     [
+      0.8,
+      0.1
+     ],
+     [
+      0.9,
+      0.2
+     ],
+     [
+      0.0,
+      0.3
+     ],
+     [
+      0.1,
+      0.4
+     ],
+     [
+      0.2,
+      0.5
+     ],
+     [
+      0.3,
+      0.6
+     ],
+     [
+      0.4,
+      0.0
+     ],
+     [
+      0.5,
+      0.1
+     ],
+     [
+      0.6,
+      0.2
+     ],
+     [
+      0.7,
+      0.3
+     ],
+     [
+      0.8,
+      0.4
+     ],
+     [
+      0.9,
+      0.5
+     ],
+     [
+      0.0,
+      0.6
+     ],
+     [
+      0.1,
+      0.0
+     ],
+     [
+      0.2,
+      0.1
+     ],
+     [
+      0.3,
+      0.2
+     ],
+     [
+      0.4,
+      0.3
+     ],
+     [
+      0.5,
+      0.4
+     ],
+     [
+      0.6,
+      0.5
+     ],
+     [
+      0.7,
+      0.6
+     ],
+     [
+      0.8,
+      0.0
+     ],
+     [
+      0.9,
+      0.1
+     ],
+     [
+      50.0,
+      50.0
+     ]
+    ],
+    "queries": [
+     [
+      0.3,
+      0.3
+     ],
+     [
+      50.0,
+      50.0
+     ]
+    ]
+   },
+   "expected": {
+    "dimension": 2,
+    "mean_path_length": [
+     7.376132672836899,
+     1.01
+    ],
+    "n_trees": 100,
+    "scores": [
+     0.4277980815982058,
+     0.8902381995043269
+    ]
+   }
+  },
+  {
+   "name": "average_path_length",
+   "kind": "average_path_length",
+   "input": {
+    "n": [
+     1,
+     2,
+     10,
+     256
+    ]
+   },
+   "expected": {
+    "values": [
+     0.0,
+     1.0,
+     3.748880484475505,
+     10.244770920119917
+    ]
+   }
+  },
+  {
+   "name": "ekf_explicit",
+   "kind": "ekf",
+   "input": {
+    "ocv": [
+     [
+      0.0,
+      3.0
+     ],
+     [
+      0.5,
+      3.7
+     ],
+     [
+      1.0,
+      4.2
+     ]
+    ],
+    "cell": {
+     "capacity_ah": 2.0,
+     "r0": 0.05,
+     "r1": 0.02,
+     "c1": 1000.0,
+     "process_soc": 1e-09,
+     "process_v1": 1e-06,
+     "measurement": 0.0001
+    },
+    "soc0": 0.8,
+    "soc_variance": 0.05,
+    "v1_variance": 0.0001,
+    "steps": [
+     {
+      "op": "predict",
+      "current": 2.0,
+      "dt": 600.0
+     },
+     {
+      "op": "update",
+      "voltage": 3.6,
+      "current": 2.0
+     },
+     {
+      "op": "predict",
+      "current": 2.0,
+      "dt": 60.0
+     }
+    ],
+    "helpers": {
+     "ocv_voltage_soc": 0.5,
+     "terminal": [
+      0.5,
+      0.1,
+      1.0
+     ]
+    }
+   },
+   "expected": {
+    "cell": {
+     "c1": 1000.0,
+     "capacity_ah": 2.0,
+     "r0": 0.05,
+     "r1": 0.02
+    },
+    "covariance": [
+     [
+      0.00010079739129365899,
+      4.968670123337985e-08
+     ],
+     [
+      4.968670123337985e-08,
+      1.0024787027015635e-06
+     ]
+    ],
+    "ocv_voltage": 3.7,
+    "states": [
+     {
+      "soc": 0.6333333333333334,
+      "soc_variance": 0.050000001,
+      "v1": 0.039999999999996254
+     },
+     {
+      "soc": 0.5401881532599813,
+      "soc_variance": 0.00010079639129365899,
+      "v1": 0.04000186290356046
+     },
+     {
+      "soc": 0.5235214865933145,
+      "soc_variance": 0.00010079739129365899,
+      "v1": 0.04000009274850693
+     }
+    ],
+    "terminal_voltage": 3.5500000000000003
+   }
+  },
+  {
+   "name": "ekf_defaults",
+   "kind": "ekf",
+   "input": {
+    "ocv": [
+     [
+      0.0,
+      3.0
+     ],
+     [
+      0.5,
+      3.7
+     ],
+     [
+      1.0,
+      4.2
+     ]
+    ],
+    "cell": {
+     "capacity_ah": 2.0,
+     "r0": 0.05,
+     "r1": 0.02,
+     "c1": 1000.0
+    },
+    "soc0": 0.8,
+    "soc_variance": 0.05,
+    "steps": [
+     {
+      "op": "predict",
+      "current": 2.0,
+      "dt": 600.0
+     },
+     {
+      "op": "update",
+      "voltage": 3.6,
+      "current": 2.0
+     },
+     {
+      "op": "predict",
+      "current": 2.0,
+      "dt": 60.0
+     }
+    ],
+    "helpers": {
+     "ocv_voltage_soc": 0.5,
+     "terminal": [
+      0.5,
+      0.1,
+      1.0
+     ]
+    }
+   },
+   "expected": {
+    "cell": {
+     "c1": 1000.0,
+     "capacity_ah": 2.0,
+     "r0": 0.05,
+     "r1": 0.02
+    },
+    "covariance": [
+     [
+      0.00010079739129365899,
+      4.968670123337985e-08
+     ],
+     [
+      4.968670123337985e-08,
+      1.0024787027015635e-06
+     ]
+    ],
+    "ocv_voltage": 3.7,
+    "states": [
+     {
+      "soc": 0.6333333333333334,
+      "soc_variance": 0.050000001,
+      "v1": 0.039999999999996254
+     },
+     {
+      "soc": 0.5401881532599813,
+      "soc_variance": 0.00010079639129365899,
+      "v1": 0.04000186290356046
+     },
+     {
+      "soc": 0.5235214865933145,
+      "soc_variance": 0.00010079739129365899,
+      "v1": 0.04000009274850693
+     }
+    ],
+    "terminal_voltage": 3.5500000000000003
+   }
+  },
+  {
+   "name": "routing_basic",
+   "kind": "routing",
+   "input": {
+    "depot": [
+     0.0,
+     0.0
+    ],
+    "capacity": 10.0,
+    "customers": [
+     {
+      "x": 1.0,
+      "y": 0.0,
+      "demand": 5.0
+     },
+     {
+      "x": -1.0,
+      "y": 0.0,
+      "demand": 5.0
+     },
+     {
+      "x": 0.0,
+      "y": 2.0,
+      "demand": 4.0,
+      "window": [
+       0.0,
+       10.0,
+       1.0
+      ]
+     },
+     {
+      "x": 0.0,
+      "y": -2.0,
+      "demand": 4.0
+     },
+     {
+      "x": 3.0,
+      "y": 3.0,
+      "demand": 6.0
+     }
+    ]
+   },
+   "expected": {
+    "cost": 16.640986324787455,
+    "routes": [
+     [
+      0,
+      3
+     ],
+     [
+      1
+     ],
+     [
+      2,
+      4
+     ]
+    ],
+    "vehicles": 3
+   }
+  },
+  {
+   "name": "orderbook_batch",
+   "kind": "orderbook",
+   "input": {
+    "events": [
+     {
+      "type": "add",
+      "id": 1,
+      "side": "bid",
+      "price": 99,
+      "qty": 10
+     },
+     {
+      "type": "add",
+      "id": 2,
+      "side": "ask",
+      "price": 101,
+      "qty": 5
+     },
+     {
+      "type": "add",
+      "id": 3,
+      "side": "bid",
+      "price": 101,
+      "qty": 5
+     },
+     {
+      "type": "modify",
+      "id": 1,
+      "qty": 8,
+      "price": null
+     },
+     {
+      "type": "cancel",
+      "id": 1
+     },
+     {
+      "type": "add",
+      "id": 4,
+      "side": "ask",
+      "price": 102,
+      "qty": 3
+     },
+     {
+      "type": "execute",
+      "id": 9,
+      "side": "bid",
+      "qty": 2
+     },
+     {
+      "type": "execute_order",
+      "id": 4,
+      "qty": 1
+     }
+    ]
+   },
+   "expected": {
+    "stats": {
+     "accepted": 26,
+     "cancelled": 10,
+     "expired": 0,
+     "traded": 8
+    },
+    "trades": [
+     {
+      "aggressor_id": 3,
+      "aggressor_side": "bid",
+      "price": 101,
+      "qty": 5,
+      "resting_id": 2,
+      "seq": 3
+     },
+     {
+      "aggressor_id": 9,
+      "aggressor_side": "bid",
+      "price": 102,
+      "qty": 2,
+      "resting_id": 4,
+      "seq": 7
+     },
+     {
+      "aggressor_id": null,
+      "aggressor_side": "bid",
+      "price": 102,
+      "qty": 1,
+      "resting_id": 4,
+      "seq": 8
+     }
+    ]
+   }
+  },
+  {
+   "name": "swarm_avoid",
+   "kind": "swarm_avoid",
+   "input": {
+    "agent": {
+     "position": [
+      0.0,
+      0.0
+     ],
+     "velocity": [
+      1.0,
+      0.0
+     ],
+     "radius": 0.5,
+     "preferred_velocity": [
+      1.0,
+      0.0
+     ],
+     "max_speed": 1.0
+    },
+    "neighbors": [
+     {
+      "position": [
+       4.0,
+       0.0
+      ],
+      "velocity": [
+       0.0,
+       0.0
+      ],
+      "radius": 0.5,
+      "preferred_velocity": [
+       0.0,
+       0.0
+      ],
+      "max_speed": 1.0
+     }
+    ],
+    "config": {
+     "responsibility": "full"
+    }
+   },
+   "expected": {
+    "velocity": [
+     0.7846282243225843,
+     -0.156072257612903
+    ]
+   }
+  },
+  {
+   "name": "swarm_find_path",
+   "kind": "swarm_find_path",
+   "input": {
+    "width": 5,
+    "height": 4,
+    "blocked": [
+     [
+      2,
+      0
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      2,
+      2
+     ]
+    ],
+    "start": [
+     0,
+     0
+    ],
+    "goal": [
+     4,
+     0
+    ],
+    "connectivity": 8
+   },
+   "expected": {
+    "cells": [
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      1
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      3,
+      3
+     ],
+     [
+      4,
+      2
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      4,
+      0
+     ]
+    ],
+    "cost": 8.8
+   }
+  },
+  {
+   "name": "consensus_honest",
+   "kind": "consensus",
+   "input": {
+    "n": 4,
+    "seed": 3,
+    "ticks": 80
+   },
+   "expected": {
+    "honest_logs": [
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "f5458bcc15e4cfcd",
+        "payload": null,
+        "proposer": 3,
+        "view": 3
+       },
+       {
+        "height": 4,
+        "id": "e966265928ce57bc",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 5,
+        "id": "f2b06dde26a0fb29",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 6,
+        "id": "1b667cdcab15d515",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 7,
+        "id": "e0151d1aeea48a65",
+        "payload": null,
+        "proposer": 3,
+        "view": 7
+       },
+       {
+        "height": 8,
+        "id": "3b4aaa81f1913f41",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 9,
+        "id": "ff4cd4c3b0e08733",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 10,
+        "id": "0254b56901de482b",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 11,
+        "id": "9ec1fd04b784dc36",
+        "payload": null,
+        "proposer": 3,
+        "view": 11
+       },
+       {
+        "height": 12,
+        "id": "72b1c65f1fe53145",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 13,
+        "id": "12fcc67e47080c5a",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 14,
+        "id": "868a1cd81cd2e706",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 15,
+        "id": "9f2f7837a7b018af",
+        "payload": null,
+        "proposer": 3,
+        "view": 15
+       },
+       {
+        "height": 16,
+        "id": "a6687a92f11518ea",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 17,
+        "id": "9b7c9a24e16e8ad9",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 18,
+        "id": "7fa26ea637992871",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 19,
+        "id": "97345f4e2e54effe",
+        "payload": null,
+        "proposer": 3,
+        "view": 19
+       },
+       {
+        "height": 20,
+        "id": "dc4ad592e53b4e8d",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 21,
+        "id": "4ddc9e8020e7c744",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 22,
+        "id": "f46925836747e360",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 23,
+        "id": "86b13a57633e4c63",
+        "payload": null,
+        "proposer": 3,
+        "view": 23
+       },
+       {
+        "height": 24,
+        "id": "aa7f6af142e38d91",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 25,
+        "id": "2cafa03b7f136848",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 26,
+        "id": "5b4a0402842de727",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 27,
+        "id": "ad1c4c2273e40f67",
+        "payload": null,
+        "proposer": 3,
+        "view": 27
+       },
+       {
+        "height": 28,
+        "id": "767da75c1b4cc49f",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 29,
+        "id": "d4b12a132aa51c95",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 30,
+        "id": "43dc6aa1ff7b60c0",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 31,
+        "id": "70bed2bdc507f27f",
+        "payload": null,
+        "proposer": 3,
+        "view": 31
+       },
+       {
+        "height": 32,
+        "id": "fd6053ca824a74d4",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 33,
+        "id": "3791a8a9e9bae72c",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 34,
+        "id": "d55907fb9a89af80",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 35,
+        "id": "343603b4ad7e8190",
+        "payload": null,
+        "proposer": 3,
+        "view": 35
+       },
+       {
+        "height": 36,
+        "id": "5cf370a082d94365",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 37,
+        "id": "e74921639160d1ba",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       }
+      ],
+      "replica": 0
+     },
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "f5458bcc15e4cfcd",
+        "payload": null,
+        "proposer": 3,
+        "view": 3
+       },
+       {
+        "height": 4,
+        "id": "e966265928ce57bc",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 5,
+        "id": "f2b06dde26a0fb29",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 6,
+        "id": "1b667cdcab15d515",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 7,
+        "id": "e0151d1aeea48a65",
+        "payload": null,
+        "proposer": 3,
+        "view": 7
+       },
+       {
+        "height": 8,
+        "id": "3b4aaa81f1913f41",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 9,
+        "id": "ff4cd4c3b0e08733",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 10,
+        "id": "0254b56901de482b",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 11,
+        "id": "9ec1fd04b784dc36",
+        "payload": null,
+        "proposer": 3,
+        "view": 11
+       },
+       {
+        "height": 12,
+        "id": "72b1c65f1fe53145",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 13,
+        "id": "12fcc67e47080c5a",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 14,
+        "id": "868a1cd81cd2e706",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 15,
+        "id": "9f2f7837a7b018af",
+        "payload": null,
+        "proposer": 3,
+        "view": 15
+       },
+       {
+        "height": 16,
+        "id": "a6687a92f11518ea",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 17,
+        "id": "9b7c9a24e16e8ad9",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 18,
+        "id": "7fa26ea637992871",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 19,
+        "id": "97345f4e2e54effe",
+        "payload": null,
+        "proposer": 3,
+        "view": 19
+       },
+       {
+        "height": 20,
+        "id": "dc4ad592e53b4e8d",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 21,
+        "id": "4ddc9e8020e7c744",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 22,
+        "id": "f46925836747e360",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 23,
+        "id": "86b13a57633e4c63",
+        "payload": null,
+        "proposer": 3,
+        "view": 23
+       },
+       {
+        "height": 24,
+        "id": "aa7f6af142e38d91",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 25,
+        "id": "2cafa03b7f136848",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 26,
+        "id": "5b4a0402842de727",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 27,
+        "id": "ad1c4c2273e40f67",
+        "payload": null,
+        "proposer": 3,
+        "view": 27
+       },
+       {
+        "height": 28,
+        "id": "767da75c1b4cc49f",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 29,
+        "id": "d4b12a132aa51c95",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 30,
+        "id": "43dc6aa1ff7b60c0",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 31,
+        "id": "70bed2bdc507f27f",
+        "payload": null,
+        "proposer": 3,
+        "view": 31
+       },
+       {
+        "height": 32,
+        "id": "fd6053ca824a74d4",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 33,
+        "id": "3791a8a9e9bae72c",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 34,
+        "id": "d55907fb9a89af80",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 35,
+        "id": "343603b4ad7e8190",
+        "payload": null,
+        "proposer": 3,
+        "view": 35
+       },
+       {
+        "height": 36,
+        "id": "5cf370a082d94365",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 37,
+        "id": "e74921639160d1ba",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       },
+       {
+        "height": 38,
+        "id": "d66705898e17bcc9",
+        "payload": null,
+        "proposer": 2,
+        "view": 38
+       }
+      ],
+      "replica": 1
+     },
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "f5458bcc15e4cfcd",
+        "payload": null,
+        "proposer": 3,
+        "view": 3
+       },
+       {
+        "height": 4,
+        "id": "e966265928ce57bc",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 5,
+        "id": "f2b06dde26a0fb29",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 6,
+        "id": "1b667cdcab15d515",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 7,
+        "id": "e0151d1aeea48a65",
+        "payload": null,
+        "proposer": 3,
+        "view": 7
+       },
+       {
+        "height": 8,
+        "id": "3b4aaa81f1913f41",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 9,
+        "id": "ff4cd4c3b0e08733",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 10,
+        "id": "0254b56901de482b",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 11,
+        "id": "9ec1fd04b784dc36",
+        "payload": null,
+        "proposer": 3,
+        "view": 11
+       },
+       {
+        "height": 12,
+        "id": "72b1c65f1fe53145",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 13,
+        "id": "12fcc67e47080c5a",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 14,
+        "id": "868a1cd81cd2e706",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 15,
+        "id": "9f2f7837a7b018af",
+        "payload": null,
+        "proposer": 3,
+        "view": 15
+       },
+       {
+        "height": 16,
+        "id": "a6687a92f11518ea",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 17,
+        "id": "9b7c9a24e16e8ad9",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 18,
+        "id": "7fa26ea637992871",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 19,
+        "id": "97345f4e2e54effe",
+        "payload": null,
+        "proposer": 3,
+        "view": 19
+       },
+       {
+        "height": 20,
+        "id": "dc4ad592e53b4e8d",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 21,
+        "id": "4ddc9e8020e7c744",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 22,
+        "id": "f46925836747e360",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 23,
+        "id": "86b13a57633e4c63",
+        "payload": null,
+        "proposer": 3,
+        "view": 23
+       },
+       {
+        "height": 24,
+        "id": "aa7f6af142e38d91",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 25,
+        "id": "2cafa03b7f136848",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 26,
+        "id": "5b4a0402842de727",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 27,
+        "id": "ad1c4c2273e40f67",
+        "payload": null,
+        "proposer": 3,
+        "view": 27
+       },
+       {
+        "height": 28,
+        "id": "767da75c1b4cc49f",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 29,
+        "id": "d4b12a132aa51c95",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 30,
+        "id": "43dc6aa1ff7b60c0",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 31,
+        "id": "70bed2bdc507f27f",
+        "payload": null,
+        "proposer": 3,
+        "view": 31
+       },
+       {
+        "height": 32,
+        "id": "fd6053ca824a74d4",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 33,
+        "id": "3791a8a9e9bae72c",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 34,
+        "id": "d55907fb9a89af80",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 35,
+        "id": "343603b4ad7e8190",
+        "payload": null,
+        "proposer": 3,
+        "view": 35
+       },
+       {
+        "height": 36,
+        "id": "5cf370a082d94365",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 37,
+        "id": "e74921639160d1ba",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       }
+      ],
+      "replica": 2
+     },
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "f5458bcc15e4cfcd",
+        "payload": null,
+        "proposer": 3,
+        "view": 3
+       },
+       {
+        "height": 4,
+        "id": "e966265928ce57bc",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 5,
+        "id": "f2b06dde26a0fb29",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 6,
+        "id": "1b667cdcab15d515",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 7,
+        "id": "e0151d1aeea48a65",
+        "payload": null,
+        "proposer": 3,
+        "view": 7
+       },
+       {
+        "height": 8,
+        "id": "3b4aaa81f1913f41",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 9,
+        "id": "ff4cd4c3b0e08733",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 10,
+        "id": "0254b56901de482b",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 11,
+        "id": "9ec1fd04b784dc36",
+        "payload": null,
+        "proposer": 3,
+        "view": 11
+       },
+       {
+        "height": 12,
+        "id": "72b1c65f1fe53145",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 13,
+        "id": "12fcc67e47080c5a",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 14,
+        "id": "868a1cd81cd2e706",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 15,
+        "id": "9f2f7837a7b018af",
+        "payload": null,
+        "proposer": 3,
+        "view": 15
+       },
+       {
+        "height": 16,
+        "id": "a6687a92f11518ea",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 17,
+        "id": "9b7c9a24e16e8ad9",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 18,
+        "id": "7fa26ea637992871",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 19,
+        "id": "97345f4e2e54effe",
+        "payload": null,
+        "proposer": 3,
+        "view": 19
+       },
+       {
+        "height": 20,
+        "id": "dc4ad592e53b4e8d",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 21,
+        "id": "4ddc9e8020e7c744",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 22,
+        "id": "f46925836747e360",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 23,
+        "id": "86b13a57633e4c63",
+        "payload": null,
+        "proposer": 3,
+        "view": 23
+       },
+       {
+        "height": 24,
+        "id": "aa7f6af142e38d91",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 25,
+        "id": "2cafa03b7f136848",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 26,
+        "id": "5b4a0402842de727",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 27,
+        "id": "ad1c4c2273e40f67",
+        "payload": null,
+        "proposer": 3,
+        "view": 27
+       },
+       {
+        "height": 28,
+        "id": "767da75c1b4cc49f",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 29,
+        "id": "d4b12a132aa51c95",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 30,
+        "id": "43dc6aa1ff7b60c0",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 31,
+        "id": "70bed2bdc507f27f",
+        "payload": null,
+        "proposer": 3,
+        "view": 31
+       },
+       {
+        "height": 32,
+        "id": "fd6053ca824a74d4",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 33,
+        "id": "3791a8a9e9bae72c",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 34,
+        "id": "d55907fb9a89af80",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 35,
+        "id": "343603b4ad7e8190",
+        "payload": null,
+        "proposer": 3,
+        "view": 35
+       },
+       {
+        "height": 36,
+        "id": "5cf370a082d94365",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 37,
+        "id": "e74921639160d1ba",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       }
+      ],
+      "replica": 3
+     }
+    ],
+    "max_honest_view": 42,
+    "now": 81,
+    "prefix_consistent": true,
+    "stats": {
+     "delivered": 240,
+     "dropped": 0,
+     "equivocations": 0,
+     "rejected_from_faulty": 0,
+     "rejected_from_honest": 0,
+     "safety_violations": 0
+    }
+   }
+  },
+  {
+   "name": "consensus_equivocator",
+   "kind": "consensus",
+   "input": {
+    "n": 4,
+    "seed": 5,
+    "ticks": 120,
+    "faults": [
+     {
+      "replica": 3,
+      "kind": "equivocate"
+     }
+    ]
+   },
+   "expected": {
+    "honest_logs": [
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "3c457273fe01b84e",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 4,
+        "id": "5a0538e0e489b8d4",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 5,
+        "id": "b6d38e6c29bfe4a9",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 6,
+        "id": "dfb86bda2529bf58",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 7,
+        "id": "85c5670091df2a28",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 8,
+        "id": "e9b28daa69013e6d",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 9,
+        "id": "51616a909cc6e67b",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 10,
+        "id": "749355ea65786433",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 11,
+        "id": "c8c43077f6980760",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 12,
+        "id": "5793a33cdd397c9b",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 13,
+        "id": "edd59b221109e147",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 14,
+        "id": "162d322f29594249",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 15,
+        "id": "c9f7df5b61f798f0",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 16,
+        "id": "46410e9500bfb1d3",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 17,
+        "id": "03bd5cd3745053de",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 18,
+        "id": "ffca0e5678117f6b",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 19,
+        "id": "7e2854a3b33391b6",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 20,
+        "id": "cfb418ca3a6c734b",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 21,
+        "id": "43163aa357b1b613",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 22,
+        "id": "4b01addcaa4784e5",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 23,
+        "id": "0cdfd998599cdc09",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 24,
+        "id": "200f998b5c379758",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 25,
+        "id": "a4cce13f37a47b5f",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 26,
+        "id": "bbed1b6ce54c9953",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 27,
+        "id": "723bc1f66d68057b",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 28,
+        "id": "5f562c16fba1aea4",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       },
+       {
+        "height": 29,
+        "id": "c1a7612aa7d23162",
+        "payload": null,
+        "proposer": 2,
+        "view": 38
+       },
+       {
+        "height": 30,
+        "id": "c8fe2ca63921fe49",
+        "payload": null,
+        "proposer": 0,
+        "view": 40
+       },
+       {
+        "height": 31,
+        "id": "0069906a9e80560a",
+        "payload": null,
+        "proposer": 1,
+        "view": 41
+       },
+       {
+        "height": 32,
+        "id": "37635654715babea",
+        "payload": null,
+        "proposer": 2,
+        "view": 42
+       },
+       {
+        "height": 33,
+        "id": "dffaccd946f21dfa",
+        "payload": null,
+        "proposer": 0,
+        "view": 44
+       },
+       {
+        "height": 34,
+        "id": "9bd91a94e5446001",
+        "payload": null,
+        "proposer": 1,
+        "view": 45
+       },
+       {
+        "height": 35,
+        "id": "2f79f818abb2a2bc",
+        "payload": null,
+        "proposer": 2,
+        "view": 46
+       },
+       {
+        "height": 36,
+        "id": "e37681cac6b355a4",
+        "payload": null,
+        "proposer": 0,
+        "view": 48
+       },
+       {
+        "height": 37,
+        "id": "18945997c25a4fca",
+        "payload": null,
+        "proposer": 1,
+        "view": 49
+       },
+       {
+        "height": 38,
+        "id": "0e62a0008a1f25b3",
+        "payload": null,
+        "proposer": 2,
+        "view": 50
+       },
+       {
+        "height": 39,
+        "id": "fe2c9b291c864071",
+        "payload": null,
+        "proposer": 0,
+        "view": 52
+       },
+       {
+        "height": 40,
+        "id": "b775665c8fbe4188",
+        "payload": null,
+        "proposer": 1,
+        "view": 53
+       },
+       {
+        "height": 41,
+        "id": "29ca5c380bd3d806",
+        "payload": null,
+        "proposer": 2,
+        "view": 54
+       },
+       {
+        "height": 42,
+        "id": "af04d3e900854db3",
+        "payload": null,
+        "proposer": 0,
+        "view": 56
+       },
+       {
+        "height": 43,
+        "id": "51204fa5cb2e09a2",
+        "payload": null,
+        "proposer": 1,
+        "view": 57
+       }
+      ],
+      "replica": 0
+     },
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "3c457273fe01b84e",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 4,
+        "id": "5a0538e0e489b8d4",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 5,
+        "id": "b6d38e6c29bfe4a9",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 6,
+        "id": "dfb86bda2529bf58",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 7,
+        "id": "85c5670091df2a28",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 8,
+        "id": "e9b28daa69013e6d",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 9,
+        "id": "51616a909cc6e67b",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 10,
+        "id": "749355ea65786433",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 11,
+        "id": "c8c43077f6980760",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 12,
+        "id": "5793a33cdd397c9b",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 13,
+        "id": "edd59b221109e147",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 14,
+        "id": "162d322f29594249",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 15,
+        "id": "c9f7df5b61f798f0",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 16,
+        "id": "46410e9500bfb1d3",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 17,
+        "id": "03bd5cd3745053de",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 18,
+        "id": "ffca0e5678117f6b",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 19,
+        "id": "7e2854a3b33391b6",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 20,
+        "id": "cfb418ca3a6c734b",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 21,
+        "id": "43163aa357b1b613",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 22,
+        "id": "4b01addcaa4784e5",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 23,
+        "id": "0cdfd998599cdc09",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 24,
+        "id": "200f998b5c379758",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 25,
+        "id": "a4cce13f37a47b5f",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 26,
+        "id": "bbed1b6ce54c9953",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 27,
+        "id": "723bc1f66d68057b",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 28,
+        "id": "5f562c16fba1aea4",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       },
+       {
+        "height": 29,
+        "id": "c1a7612aa7d23162",
+        "payload": null,
+        "proposer": 2,
+        "view": 38
+       },
+       {
+        "height": 30,
+        "id": "c8fe2ca63921fe49",
+        "payload": null,
+        "proposer": 0,
+        "view": 40
+       },
+       {
+        "height": 31,
+        "id": "0069906a9e80560a",
+        "payload": null,
+        "proposer": 1,
+        "view": 41
+       },
+       {
+        "height": 32,
+        "id": "37635654715babea",
+        "payload": null,
+        "proposer": 2,
+        "view": 42
+       },
+       {
+        "height": 33,
+        "id": "dffaccd946f21dfa",
+        "payload": null,
+        "proposer": 0,
+        "view": 44
+       },
+       {
+        "height": 34,
+        "id": "9bd91a94e5446001",
+        "payload": null,
+        "proposer": 1,
+        "view": 45
+       },
+       {
+        "height": 35,
+        "id": "2f79f818abb2a2bc",
+        "payload": null,
+        "proposer": 2,
+        "view": 46
+       },
+       {
+        "height": 36,
+        "id": "e37681cac6b355a4",
+        "payload": null,
+        "proposer": 0,
+        "view": 48
+       },
+       {
+        "height": 37,
+        "id": "18945997c25a4fca",
+        "payload": null,
+        "proposer": 1,
+        "view": 49
+       },
+       {
+        "height": 38,
+        "id": "0e62a0008a1f25b3",
+        "payload": null,
+        "proposer": 2,
+        "view": 50
+       },
+       {
+        "height": 39,
+        "id": "fe2c9b291c864071",
+        "payload": null,
+        "proposer": 0,
+        "view": 52
+       },
+       {
+        "height": 40,
+        "id": "b775665c8fbe4188",
+        "payload": null,
+        "proposer": 1,
+        "view": 53
+       },
+       {
+        "height": 41,
+        "id": "29ca5c380bd3d806",
+        "payload": null,
+        "proposer": 2,
+        "view": 54
+       },
+       {
+        "height": 42,
+        "id": "af04d3e900854db3",
+        "payload": null,
+        "proposer": 0,
+        "view": 56
+       }
+      ],
+      "replica": 1
+     },
+     {
+      "blocks": [
+       {
+        "height": 1,
+        "id": "52a1c965408913d9",
+        "payload": null,
+        "proposer": 1,
+        "view": 1
+       },
+       {
+        "height": 2,
+        "id": "9f3f17d6300dedd6",
+        "payload": null,
+        "proposer": 2,
+        "view": 2
+       },
+       {
+        "height": 3,
+        "id": "3c457273fe01b84e",
+        "payload": null,
+        "proposer": 0,
+        "view": 4
+       },
+       {
+        "height": 4,
+        "id": "5a0538e0e489b8d4",
+        "payload": null,
+        "proposer": 1,
+        "view": 5
+       },
+       {
+        "height": 5,
+        "id": "b6d38e6c29bfe4a9",
+        "payload": null,
+        "proposer": 2,
+        "view": 6
+       },
+       {
+        "height": 6,
+        "id": "dfb86bda2529bf58",
+        "payload": null,
+        "proposer": 0,
+        "view": 8
+       },
+       {
+        "height": 7,
+        "id": "85c5670091df2a28",
+        "payload": null,
+        "proposer": 1,
+        "view": 9
+       },
+       {
+        "height": 8,
+        "id": "e9b28daa69013e6d",
+        "payload": null,
+        "proposer": 2,
+        "view": 10
+       },
+       {
+        "height": 9,
+        "id": "51616a909cc6e67b",
+        "payload": null,
+        "proposer": 0,
+        "view": 12
+       },
+       {
+        "height": 10,
+        "id": "749355ea65786433",
+        "payload": null,
+        "proposer": 1,
+        "view": 13
+       },
+       {
+        "height": 11,
+        "id": "c8c43077f6980760",
+        "payload": null,
+        "proposer": 2,
+        "view": 14
+       },
+       {
+        "height": 12,
+        "id": "5793a33cdd397c9b",
+        "payload": null,
+        "proposer": 0,
+        "view": 16
+       },
+       {
+        "height": 13,
+        "id": "edd59b221109e147",
+        "payload": null,
+        "proposer": 1,
+        "view": 17
+       },
+       {
+        "height": 14,
+        "id": "162d322f29594249",
+        "payload": null,
+        "proposer": 2,
+        "view": 18
+       },
+       {
+        "height": 15,
+        "id": "c9f7df5b61f798f0",
+        "payload": null,
+        "proposer": 0,
+        "view": 20
+       },
+       {
+        "height": 16,
+        "id": "46410e9500bfb1d3",
+        "payload": null,
+        "proposer": 1,
+        "view": 21
+       },
+       {
+        "height": 17,
+        "id": "03bd5cd3745053de",
+        "payload": null,
+        "proposer": 2,
+        "view": 22
+       },
+       {
+        "height": 18,
+        "id": "ffca0e5678117f6b",
+        "payload": null,
+        "proposer": 0,
+        "view": 24
+       },
+       {
+        "height": 19,
+        "id": "7e2854a3b33391b6",
+        "payload": null,
+        "proposer": 1,
+        "view": 25
+       },
+       {
+        "height": 20,
+        "id": "cfb418ca3a6c734b",
+        "payload": null,
+        "proposer": 2,
+        "view": 26
+       },
+       {
+        "height": 21,
+        "id": "43163aa357b1b613",
+        "payload": null,
+        "proposer": 0,
+        "view": 28
+       },
+       {
+        "height": 22,
+        "id": "4b01addcaa4784e5",
+        "payload": null,
+        "proposer": 1,
+        "view": 29
+       },
+       {
+        "height": 23,
+        "id": "0cdfd998599cdc09",
+        "payload": null,
+        "proposer": 2,
+        "view": 30
+       },
+       {
+        "height": 24,
+        "id": "200f998b5c379758",
+        "payload": null,
+        "proposer": 0,
+        "view": 32
+       },
+       {
+        "height": 25,
+        "id": "a4cce13f37a47b5f",
+        "payload": null,
+        "proposer": 1,
+        "view": 33
+       },
+       {
+        "height": 26,
+        "id": "bbed1b6ce54c9953",
+        "payload": null,
+        "proposer": 2,
+        "view": 34
+       },
+       {
+        "height": 27,
+        "id": "723bc1f66d68057b",
+        "payload": null,
+        "proposer": 0,
+        "view": 36
+       },
+       {
+        "height": 28,
+        "id": "5f562c16fba1aea4",
+        "payload": null,
+        "proposer": 1,
+        "view": 37
+       },
+       {
+        "height": 29,
+        "id": "c1a7612aa7d23162",
+        "payload": null,
+        "proposer": 2,
+        "view": 38
+       },
+       {
+        "height": 30,
+        "id": "c8fe2ca63921fe49",
+        "payload": null,
+        "proposer": 0,
+        "view": 40
+       },
+       {
+        "height": 31,
+        "id": "0069906a9e80560a",
+        "payload": null,
+        "proposer": 1,
+        "view": 41
+       },
+       {
+        "height": 32,
+        "id": "37635654715babea",
+        "payload": null,
+        "proposer": 2,
+        "view": 42
+       },
+       {
+        "height": 33,
+        "id": "dffaccd946f21dfa",
+        "payload": null,
+        "proposer": 0,
+        "view": 44
+       },
+       {
+        "height": 34,
+        "id": "9bd91a94e5446001",
+        "payload": null,
+        "proposer": 1,
+        "view": 45
+       },
+       {
+        "height": 35,
+        "id": "2f79f818abb2a2bc",
+        "payload": null,
+        "proposer": 2,
+        "view": 46
+       },
+       {
+        "height": 36,
+        "id": "e37681cac6b355a4",
+        "payload": null,
+        "proposer": 0,
+        "view": 48
+       },
+       {
+        "height": 37,
+        "id": "18945997c25a4fca",
+        "payload": null,
+        "proposer": 1,
+        "view": 49
+       },
+       {
+        "height": 38,
+        "id": "0e62a0008a1f25b3",
+        "payload": null,
+        "proposer": 2,
+        "view": 50
+       },
+       {
+        "height": 39,
+        "id": "fe2c9b291c864071",
+        "payload": null,
+        "proposer": 0,
+        "view": 52
+       },
+       {
+        "height": 40,
+        "id": "b775665c8fbe4188",
+        "payload": null,
+        "proposer": 1,
+        "view": 53
+       },
+       {
+        "height": 41,
+        "id": "29ca5c380bd3d806",
+        "payload": null,
+        "proposer": 2,
+        "view": 54
+       },
+       {
+        "height": 42,
+        "id": "af04d3e900854db3",
+        "payload": null,
+        "proposer": 0,
+        "view": 56
+       }
+      ],
+      "replica": 2
+     }
+    ],
+    "max_honest_view": 62,
+    "now": 121,
+    "prefix_consistent": true,
+    "stats": {
+     "delivered": 405,
+     "dropped": 0,
+     "equivocations": 15,
+     "rejected_from_faulty": 0,
+     "rejected_from_honest": 0,
+     "safety_violations": 0
+    }
+   }
+  },
+  {
+   "name": "error_ekf_table_length",
+   "kind": "error",
+   "input": {
+    "op": "ekf_table",
+    "points": 9
+   },
+   "expected": {
+    "kind": "unsupported"
+   }
+  },
+  {
+   "name": "error_ekf_capacity",
+   "kind": "error",
+   "input": {
+    "op": "ekf_capacity",
+    "capacity_ah": 0.0
+   },
+   "expected": {
+    "kind": "invalid_config"
+   }
+  },
+  {
+   "name": "error_forest_trees",
+   "kind": "error",
+   "input": {
+    "op": "forest_trees",
+    "n_trees": 0
+   },
+   "expected": {
+    "kind": "invalid_config"
+   }
+  },
+  {
+   "name": "error_forest_empty",
+   "kind": "error",
+   "input": {
+    "op": "forest_empty"
+   },
+   "expected": {
+    "kind": "invalid_input"
+   }
+  },
+  {
+   "name": "error_forest_dim",
+   "kind": "error",
+   "input": {
+    "op": "forest_dim"
+   },
+   "expected": {
+    "kind": "invalid_input"
+   }
+  },
+  {
+   "name": "error_routing_infeasible",
+   "kind": "error",
+   "input": {
+    "op": "routing_infeasible"
+   },
+   "expected": {
+    "kind": "infeasible"
+   }
+  },
+  {
+   "name": "error_swarm_unreachable",
+   "kind": "error",
+   "input": {
+    "op": "swarm_unreachable"
+   },
+   "expected": {
+    "kind": "unreachable"
+   }
+  },
+  {
+   "name": "error_orderbook_unknown",
+   "kind": "error",
+   "input": {
+    "op": "orderbook_unknown"
+   },
+   "expected": {
+    "kind": "invalid_input"
+   }
+  }
+ ]
+}

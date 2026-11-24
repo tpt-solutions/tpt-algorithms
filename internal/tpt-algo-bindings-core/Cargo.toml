@@ -1,6 +1,6 @@
 [package]
 name = "tpt-algo-bindings-core"
-description = "Internal binding-independent wrappers around tpt-algo-fraud and tpt-algo-soc (no FFI)."
+description = "Internal binding-independent wrappers around the tpt-algo crates (no FFI)."
 readme = "README.md"
 keywords = ["bindings", "wrapper", "fraud", "battery"]
 categories = ["api-bindings"]
@@ -13,6 +13,11 @@ publish = false
 [dependencies]
 tpt-algo-fraud = { path = "../../crates/tpt-algo-fraud" }
 tpt-algo-soc = { path = "../../crates/tpt-algo-soc" }
+tpt-algo-routing = { path = "../../crates/tpt-algo-routing" }
+tpt-algo-orderbook = { path = "../../crates/tpt-algo-orderbook" }
+tpt-algo-swarm = { path = "../../crates/tpt-algo-swarm" }
+tpt-algo-consensus = { path = "../../crates/tpt-algo-consensus" }
+serde_json = "1"
 
 [lints]
 workspace = true

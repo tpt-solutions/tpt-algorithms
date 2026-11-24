@@ -9,8 +9,19 @@ PyPI package is built by the manual `bindings-publish` workflow.
 
 ### Added
 
-- `tpt_algo.IsolationForest`: `fit` (static), `dimension`, `score` and
-  `score_samples`.
-- `tpt_algo.Ekf`: `predict`, `update`, `soc` and `estimate`.
-- Errors raise `ValueError`.
-- Unit tests in `tests/` (`python -m unittest discover -s tests -v`).
+- `IsolationForest`: `fit` (static, with `n_trees`, `subsample_size` and `seed`
+  keyword arguments), `dimension`, `n_trees`, `score`, `score_samples` and
+  `mean_path_length`. `average_path_length(n)` is a module function.
+- `Ekf`: `predict`, `update`, `soc`, `estimate`, `covariance`, `model`,
+  `ocv_voltage` and `terminal_voltage`.
+- `OrderBook` (atomic event batches), `solve_routes`, `avoid`, `find_path` and
+  `simulate_consensus`.
+- `TptAlgoError`, a `ValueError` subclass with a `kind` attribute.
+- `tpt_algo.__version__`, `py.typed` and a `.pyi` stub. The native extension is
+  `tpt_algo._native`.
+- Unit tests in `tests/` and the shared parity fixtures (`tests/test_parity.py`).
+
+### Changed
+
+- Errors that were plain `ValueError` are now `TptAlgoError`, which still
+  subclasses `ValueError`.

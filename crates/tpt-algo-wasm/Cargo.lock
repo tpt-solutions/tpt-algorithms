@@ -268,12 +268,39 @@ dependencies = [
 name = "tpt-algo-bindings-core"
 version = "0.0.0"
 dependencies = [
+ "serde_json",
+ "tpt-algo-consensus",
  "tpt-algo-fraud",
+ "tpt-algo-orderbook",
+ "tpt-algo-routing",
  "tpt-algo-soc",
+ "tpt-algo-swarm",
+]
+
+[[package]]
+name = "tpt-algo-consensus"
+version = "0.0.0"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]
 name = "tpt-algo-fraud"
+version = "0.0.0"
+dependencies = [
+ "libm",
+ "thiserror",
+]
+
+[[package]]
+name = "tpt-algo-orderbook"
+version = "0.0.0"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
+name = "tpt-algo-routing"
 version = "0.0.0"
 dependencies = [
  "libm",
@@ -289,9 +316,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "tpt-algo-swarm"
+version = "0.0.0"
+dependencies = [
+ "libm",
+ "thiserror",
+]
+
+[[package]]
 name = "tpt-algo-wasm"
 version = "0.0.0"
 dependencies = [
+ "js-sys",
+ "serde_json",
  "tpt-algo-bindings-core",
  "wasm-bindgen",
  "wasm-bindgen-test",

@@ -1,6 +1,6 @@
 [package]
 name = "tpt-algo-py"
-description = "Python bindings (pyo3) for tpt-algo-fraud and tpt-algo-soc. Built with maturin; not published to crates.io."
+description = "Python bindings (pyo3) for the tpt-algo crates. Built with maturin; not published to crates.io."
 readme = "README.md"
 keywords = ["python", "pyo3", "maturin", "bindings"]
 categories = ["api-bindings", "external-ffi-bindings", "science"]
@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [lib]
-name = "tpt_algo"
+name = "_native"
 crate-type = ["cdylib"]
 
 [features]
